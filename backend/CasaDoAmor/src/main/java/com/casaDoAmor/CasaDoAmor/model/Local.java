@@ -12,6 +12,6 @@ import lombok.Data;
 public class Local {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID identificador;
+    private UUID id;
     private String nome;
 }
