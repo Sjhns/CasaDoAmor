@@ -1,5 +1,4 @@
 package com.casaDoAmor.CasaDoAmor.model;
-
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Entity;
@@ -11,7 +10,7 @@ import lombok.Data;
 @Entity
 public class DenominacaoGenerica {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private String nome;
 }
