@@ -12,7 +12,7 @@ import lombok.Data;
 public class Estoque {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID identificador;
+    private UUID id;
     private long quantidade;
     private long estoque_minimo;
     private long estoque_maximo;
