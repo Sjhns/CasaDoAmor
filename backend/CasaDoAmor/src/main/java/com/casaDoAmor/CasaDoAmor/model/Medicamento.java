@@ -13,7 +13,7 @@ import java.util.Date;
 public class Medicamento {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID identificador;
+    private UUID id;
     private String nome;
     private String lote;
     private String forma_farmaceutica;
