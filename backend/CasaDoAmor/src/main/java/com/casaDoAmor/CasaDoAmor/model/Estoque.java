@@ -12,8 +12,8 @@ public class Estoque {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    private long quantidade;
-    private long estoqueMinimo;
-    private long estoqueMaximo;
+    private Long quantidade;
+    private Long estoqueMinimo;
+    private Long estoqueMaximo;
     private String status;
 }
