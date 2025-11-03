@@ -1,6 +1,7 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -24,21 +25,20 @@ public class LocalController {
     }
     private Local paraModel(LocalDTO dto) {
         Local entidade = new Local();
-        entidade.setId(dto.getId());
         entidade.setNome(dto.getNome());
         return entidade;
     }
     private LocalDTO paraDTO(Local entidade) {
         LocalDTO dto = new LocalDTO();
-        dto.setId(entidade.getId());
         dto.setNome(entidade.getNome());
+        dto.setId(entidade.getId());
         return dto;
     }
     @PostMapping
-    public ResponseEntity<LocalDTO> salvar(@RequestBody LocalDTO dto) {
+    public ResponseEntity<UUID> salvar(@RequestBody LocalDTO dto) {
         Local entidadeParaSerSalva = paraModel(dto); 
         Local entidadeSalva = localService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(paraDTO(entidadeSalva));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
     }
     @GetMapping
     public ResponseEntity<List<LocalDTO>> listar() {
