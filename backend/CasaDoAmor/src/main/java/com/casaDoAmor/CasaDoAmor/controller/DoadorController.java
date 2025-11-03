@@ -1,5 +1,6 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,6 @@ public class DoadorController {
 
     private Doador paraModel(DoadorDTO dto) {
         Doador entidade = new Doador();
-        entidade.setId(dto.getId());
         entidade.setCpfCnpj(dto.getCpfCnpj());
         entidade.setNome(dto.getNome());
         entidade.setEmail(dto.getEmail());
@@ -33,19 +33,20 @@ public class DoadorController {
     }
     private DoadorDTO paraDTO(Doador entidade) {
         DoadorDTO dto = new DoadorDTO();
-        dto.setId(entidade.getId());
         dto.setCpfCnpj(entidade.getCpfCnpj());
         dto.setNome(entidade.getNome());
         dto.setEmail(entidade.getEmail());
         dto.setTelefone(entidade.getTelefone());
+        dto.setId(entidade.getId());
+
         return dto;
     }
 
     @PostMapping
-    public ResponseEntity<DoadorDTO> salvar(@RequestBody DoadorDTO dto) {
+    public ResponseEntity<UUID> salvar(@RequestBody DoadorDTO dto) {
         Doador entidadeParaSerSalva = paraModel(dto); 
         Doador entidadeSalva = doadorService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(paraDTO(entidadeSalva));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
     }
     @GetMapping
     public ResponseEntity<List<DoadorDTO>> listar() {
