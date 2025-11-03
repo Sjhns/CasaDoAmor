@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 
 
-
 @Repository
 public interface MedicamentoRepository extends JpaRepository<Medicamento, UUID> {
     Optional<Medicamento> findById(UUID id);
