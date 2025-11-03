@@ -1,5 +1,6 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,21 +22,22 @@ public class DenominacaoGenericaController {
     }
     private DenominacaoGenerica paraModel(DenominacaoGenericaDTO dto) {
         DenominacaoGenerica entidade = new DenominacaoGenerica();
-        entidade.setId(dto.getId()); 
+
         entidade.setNome(dto.getNome());
         return entidade;
     }
     private DenominacaoGenericaDTO paraDTO(DenominacaoGenerica entidade) {
         DenominacaoGenericaDTO dto = new DenominacaoGenericaDTO();
-        dto.setId(entidade.getId());
         dto.setNome(entidade.getNome());
+        dto.setId(entidade.getId());
+
         return dto;
     }
     @PostMapping
-    public ResponseEntity<DenominacaoGenericaDTO> salvar(@RequestBody DenominacaoGenericaDTO dto) {
+    public ResponseEntity<UUID> salvar(@RequestBody DenominacaoGenericaDTO dto) {
         DenominacaoGenerica entidadeParaSerSalva = paraModel(dto); 
         DenominacaoGenerica entidadeSalva = denominacaoGenericaService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(paraDTO(entidadeSalva));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
     }
     @GetMapping
     public ResponseEntity<List<DenominacaoGenericaDTO>> listar() {
