@@ -1,6 +1,7 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class MedicamentoController {
     }
     private Medicamento paraModel(MedicamentoDTO dto) {
         Medicamento entidade = new Medicamento();
-        entidade.setId(dto.getId());
+
         entidade.setNome(dto.getNome());
         entidade.setLote(dto.getLote());
         entidade.setFormaFarmaceutica(dto.getFormaFarmaceutica());
@@ -39,7 +40,6 @@ public class MedicamentoController {
     
     private MedicamentoDTO paraDTO(Medicamento entidade) {
         MedicamentoDTO dto = new MedicamentoDTO();
-        dto.setId(entidade.getId());
         dto.setNome(entidade.getNome());
         dto.setLote(entidade.getLote());
         dto.setFormaFarmaceutica(entidade.getFormaFarmaceutica());
@@ -48,13 +48,14 @@ public class MedicamentoController {
         dto.setCategoriaTerapeutica(entidade.getCategoriaTerapeutica());
         dto.setLaboratorioFabricante(entidade.getLaboratorioFabricante());
         dto.setValidade(entidade.getValidade());
+        dto.setId(entidade.getId());
         return dto;
     }
     @PostMapping
-    public ResponseEntity<MedicamentoDTO> salvar(@RequestBody MedicamentoDTO dto) {
+    public ResponseEntity<UUID> salvar(@RequestBody MedicamentoDTO dto) {
         Medicamento entidadeParaSerSalva = paraModel(dto); 
         Medicamento entidadeSalva = medicamentoService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(paraDTO(entidadeSalva));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
     }
     @GetMapping
     public ResponseEntity<List<MedicamentoDTO>> listar() {
