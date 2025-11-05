@@ -60,8 +60,8 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className={styles.formField}>
                     <label>Nome da Caixa</label>
-                    <input type="text" {...register('nomeCaixa')}/>
-                    {errors.nomeCaixa && <p className={styles.error}>{errors.nomeCaixa.message}</p>}
+                    <input type="text" {...register('nome')}/>
+                    {errors.nome && <p className={styles.error}>{errors.nome.message}</p>}
                 </div>
 
                 {/* E aqui */}
