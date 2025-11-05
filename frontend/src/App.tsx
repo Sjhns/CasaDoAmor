@@ -1,37 +1,61 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import MedicationFormModal from './components/MedicationFormModal'
+import { type FormData } from './components/MedicationFormModal.schema';
 
+type MedicamentoComId = FormData & { id: number | string };
 function App() {
-  const [count, setCount] = useState(0)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // 3. Defina o tipo do estado e inicie com 'undefined'
+  const [editingMed, setEditingMed] = useState<MedicamentoComId | undefined>(undefined); 
+
+  const handleOpenCreateModal = () => {
+    // 4. Mude de 'null' para 'undefined'
+    setEditingMed(undefined); // Sem dados = Modo Criação
+    setIsModalOpen(true);
+  };
+
+  // 5. Use o tipo na função (erro 'any' resolvido!)
+  const handleOpenEditModal = (medicamento: MedicamentoComId) => {
+    setEditingMed(medicamento); // Com dados = Modo Edição
+    setIsModalOpen(true);
+  };
+const mockMedicamento: MedicamentoComId = {
+    id: 123, // ID de teste
+    nomeCaixa: "Dipirona (Teste)",
+    nomeGenerico: "Dipirona Sódica",
+    codigo: "MOCK123",
+    lote: "LOTE-DE-TESTE",
+    validade: "2025-12-31", // Lembre-se que definimos como string
+    apelido: "Dipi",
+    descricao: "Este é um remédio de teste para edição."
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <MedicationFormModal/>
-    </>
-  )
-}
+    <div>
+      <button onClick={handleOpenCreateModal}>
+        Criar Novo Medicamento (Testar)
+      </button>
 
+      <hr />
+
+      <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
+        <h4>Item de Remédio (Exemplo)</h4>
+        <p>Nome: {mockMedicamento.nomeCaixa}</p>
+        
+        <button onClick={() => handleOpenEditModal(mockMedicamento)}>
+          Editar (Testar)
+        </button>
+      </div>
+
+      {isModalOpen && (
+        <MedicationFormModal 
+          medicationData={editingMed} 
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
 export default App

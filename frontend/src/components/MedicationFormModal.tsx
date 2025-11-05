@@ -1,46 +1,58 @@
 import './styles/MedicationFormModal.css';
-import { useForm, type SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Resolver } from 'react-hook-form';
+import axios from 'axios';
+import { formSchema, type FormData } from './MedicationFormModal.schema';
 /*
     IMPORTS DAS FERRAMENTAS UTILIZADAS
 */ 
 
-/*
-    CRIAÇÃO DO FORMULÁRIO USANDO O HOOK FORM E ZOD COMO RESOLVER
-*/ 
-const formSchema = z.object({
-    nomeCaixa: z.string(). min(1, 'Este campo é obrigatório'),
-    nomeGenerico: z.string(). min(1, 'Este campo é obrigatório'),
-    apelido: z.string().optional(),
-    codigo: z.string(). min(1, 'Este campo é obrigatório'),
-    descricao: z.string().optional(),
-    lote: z.string(). min(1, 'Este campo é obrigatório'),
-    validade: z.coerce.date(),
-});
-
-type FormData = z.infer<typeof formSchema>;
+interface MedicationFormModalProps {
+    medicationData?: FormData & { id: number | string};
+    onClose: () => void;
+}
 
 /*
     FUNCOES DO COMPONENTE
 */
-const MedicationFormModal = () => {
+const MedicationFormModal = (props: MedicationFormModalProps) => {
+    const { medicationData } = props;
+    const edicao = Boolean(medicationData);
     const {
         register, 
         handleSubmit, 
         formState: { errors }
     } = useForm<FormData>({
-        resolver: zodResolver(formSchema) as Resolver<FormData>
+        resolver: zodResolver(formSchema) as Resolver<FormData>,
+        defaultValues: edicao ? medicationData : {}
     });
 
     /*
         O QUE ELE FAZ QUANDO É ENVIADO (por enquanto por motivos de teste, escreveremos no log do console)
     */
 
-    const onSubmit: SubmitHandler<FormData> = (data) => {
-        console.log('DADOS VÁLIDOS:', data);
-        alert('Formulário enviado com sucesso! Veja o console (F12).');
+    const onSubmit = async (data: FormData) => {
+        try {
+            if(medicationData) {
+                const id = medicationData.id;
+                const url = `/medicamento/${id}`;
+                const response = await axios.put(url, data);
+                console.log('PUT: ', response.data)
+            } else {
+                const url = '/medicamento';
+                const response = await axios.post(url, data);
+                console.log('PUT: ', response.data)
+            }
+        } catch (error) {
+            if(axios.isAxiosError(error)) {
+                alert('Erro ao salvar os dados. Tente novamente');
+                console.error('Erro do servidor: ', error.response?.status, error.response?.data);
+            } else {
+                alert('Erro ao salvar os dados. Tente novamente');
+                console.error('Erro do servidor: ', error);
+            }
+        }
     };
 
     /*
