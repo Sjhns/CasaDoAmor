@@ -16,7 +16,9 @@ import com.casaDoAmor.CasaDoAmor.dto.MedicamentoDTO;
 import com.casaDoAmor.CasaDoAmor.model.Medicamento;
 import com.casaDoAmor.CasaDoAmor.service.MedicamentoService;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/medicamento")
 public class MedicamentoController {

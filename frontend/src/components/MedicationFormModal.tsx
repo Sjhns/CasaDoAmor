@@ -1,39 +1,28 @@
-import './styles/MedicationFormModal.css';
+import styles from './styles/MedicationFormModal.module.css';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { Resolver } from 'react-hook-form';
 import axios from 'axios';
 import { formSchema, type FormData } from './MedicationFormModal.schema';
 import { useQueryClient } from '@tanstack/react-query';
-/*
-    IMPORTS DAS FERRAMENTAS UTILIZADAS
-*/ 
 
 interface MedicationFormModalProps {
     medicationData?: FormData & { id: number | string};
     onClose: () => void;
 }
 
-/*
-    FUNCOES DO COMPONENTE
-*/
 const MedicationFormModal = (props: MedicationFormModalProps) => {
     const { medicationData, onClose } = props;
-    const edicao = Boolean(medicationData);
+    
     const {
         register, 
         handleSubmit, 
         formState: { errors }
     } = useForm<FormData>({
-        resolver: zodResolver(formSchema) as Resolver<FormData>,
-        defaultValues: edicao ? medicationData : {}
+        resolver: zodResolver(formSchema),
+        defaultValues: medicationData ? medicationData : {}
     });
 
     const queryClient = useQueryClient();
-
-    /*
-        O QUE ELE FAZ QUANDO É ENVIADO (por enquanto por motivos de teste, escreveremos no log do console)
-    */
 
     const onSubmit = async (data: FormData) => {
         try {
@@ -61,51 +50,73 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
         }
     };
 
-    /*
-        ESTRUTURA BASE HTML
-    */
+    // Em: MedicationFormModal.tsx
 
     return (
-        <div className = 'modal-backdrop'>
-            <div className = 'modal-content'>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div>
-                        <label>Nome da Caixa</label>
-                        <input type="text" {...register('nomeCaixa')}/>
-                        {errors.nomeCaixa && <p style={{color: 'red'}}>{errors.nomeCaixa.message}</p>}
-                    </div>
-                    <div>
-                        <label>Nome Genérico</label>
-                        <input type="text" {...register('nomeGenerico')}/>
-                        {errors.nomeGenerico && <p style={{color: 'red'}}>{errors.nomeGenerico.message}</p>}
-                    </div>
-                    <div>
-                        <label>Apelido</label>
-                        <input type="text" {...register('apelido')}/>
-                    </div>
-                    <div>
-                        <label>Código</label>
-                        <input type="text" {...register('codigo')}/>
-                        {errors.codigo && <p style={{color: 'red'}}>{errors.codigo.message}</p>}
-                    </div>
-                    <div>
+    <div className={styles.modalBackdrop} onClick={onClose}>
+        
+        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <div className={styles.formField}>
+                    <label>Nome da Caixa</label>
+                    <input type="text" {...register('nomeCaixa')}/>
+                    {errors.nomeCaixa && <p className={styles.error}>{errors.nomeCaixa.message}</p>}
+                </div>
+
+                {/* E aqui */}
+                <div className={styles.formField}>
+                    <label>Nome Genérico</label>
+                    <input type="text" {...register('nomeGenerico')}/>
+                    {errors.nomeGenerico && <p className={styles.error}>{errors.nomeGenerico.message}</p>}
+                </div>
+
+                {/* E aqui */}
+                <div className={styles.formField}>
+                    <label>Apelido</label>
+                    <input type="text" {...register('apelido')}/>
+                </div>
+                
+                {/* E aqui */}
+                <div className={styles.formField}>
+                    <label>Código</label>
+                    <input type="text" {...register('codigo')}/>
+                    {errors.codigo && <p className={styles.error}>{errors.codigo.message}</p>}
+                </div>
+
+                <div className={styles.containerLadoALado}>
+
+                    <div className={styles.itemLadoALado}>
                         <label>Validade</label>
                         <input type="date" {...register('validade')}/>
-                        {errors.validade && <p style={{color: 'red'}}>{errors.validade.message}</p>}
+                        {errors.validade && <p className={styles.error}>{errors.validade.message}</p>}
                     </div>
-                    <div>
+                    
+                    <div className={styles.itemLadoALado}>
                         <label>Lote</label>
                         <input type="text" {...register('lote')}/>
-                        {errors.lote && <p style={{color: 'red'}}>{errors.lote.message}</p>}
+                        {errors.lote && <p className={styles.error}>{errors.lote.message}</p>}
                     </div>
-                    <div>
-                        <label>Descrição</label>
-                        <input type="text" {...register('descricao')}/>
-                    </div>
-                    <button type="submit">Enviar Formulário</button>
-                </form>
-            </div>
+
+                </div>
+
+                <div className={styles.formField}>
+                    <label>Descrição</label>
+                    <textarea 
+                        className={styles.descricaoTextarea} 
+                        {...register('descricao')} 
+                        rows={4} 
+                    />
+                </div>
+
+                <div className={styles.botoesContainer}>
+                    <button type="button" onClick={onClose}>Cancelar</button>
+                    <button type="submit">{medicationData ? 'Editar' : 'Adicionar'}</button>
+                </div>
+
+            </form>
         </div>
+    </div>
     );
 };
 
