@@ -39,13 +39,13 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
         try {
             if(medicationData) {
                 const id = medicationData.id;
-                const url = `/medicamento/${id}`;
+                const url = `http://localhost:8080/medicamento/${id}`;
                 const response = await axios.put(url, data);
                 console.log('PUT: ', response.data)
             } else {
-                const url = '/medicamento';
+                const url = 'http://localhost:8080/medicamento';
                 const response = await axios.post(url, data);
-                console.log('PUT: ', response.data)
+                console.log('POST: ', response.data)
             }
 
             await queryClient.invalidateQueries({queryKey: ['medicamentos']});
