@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Resolver } from 'react-hook-form';
 import axios from 'axios';
 import { formSchema, type FormData } from './MedicationFormModal.schema';
+import { useQueryClient } from '@tanstack/react-query';
 /*
     IMPORTS DAS FERRAMENTAS UTILIZADAS
 */ 
@@ -17,7 +18,7 @@ interface MedicationFormModalProps {
     FUNCOES DO COMPONENTE
 */
 const MedicationFormModal = (props: MedicationFormModalProps) => {
-    const { medicationData } = props;
+    const { medicationData, onClose } = props;
     const edicao = Boolean(medicationData);
     const {
         register, 
@@ -27,6 +28,8 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
         resolver: zodResolver(formSchema) as Resolver<FormData>,
         defaultValues: edicao ? medicationData : {}
     });
+
+    const queryClient = useQueryClient();
 
     /*
         O QUE ELE FAZ QUANDO É ENVIADO (por enquanto por motivos de teste, escreveremos no log do console)
@@ -44,6 +47,9 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
                 const response = await axios.post(url, data);
                 console.log('PUT: ', response.data)
             }
+
+            await queryClient.invalidateQueries({queryKey: ['medicamentos']});
+            onClose();
         } catch (error) {
             if(axios.isAxiosError(error)) {
                 alert('Erro ao salvar os dados. Tente novamente');
