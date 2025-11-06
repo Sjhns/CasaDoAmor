@@ -14,4 +14,8 @@ public interface EstoqueRepository extends JpaRepository<Estoque, UUID>{
     Estoque findByEstoqueMaximo(long estoqueMaximo);
     Estoque findByEstoqueMinimo(long estoqueMinimo);
     Estoque findByStatus(String status);
+    Estoque findByLote(String lote);
+    Estoque findByValidadeAposAberto(java.time.LocalDate validadeAposAberto);
+
+    Optional<Estoque> findByMedicamentoId(UUID medicamentoId);
 }
