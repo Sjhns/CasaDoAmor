@@ -1,18 +1,16 @@
-package com.CasaDoAmor.CasaDoAmor.service;
+package com.casaDoAmor.CasaDoAmor.service;
 
-// --- IMPORTS COMPLETOS (A CAUSA DO SEU ERRO) ---
-import com.CasaDoAmor.CasaDoAmor.model.Estoque;
-import com.CasaDoAmor.CasaDoAmor.model.Medicamento;
-import com.CasaDoAmor.CasaDoAmor.model.Notificacao;
-import com.CasaDoAmor.CasaDoAmor.repository.EstoqueRepository;
-import com.CasaDoAmor.CasaDoAmor.repository.MedicamentoRepository;
-import com.CasaDoAmor.CasaDoAmor.repository.NotificacaoRepository;
+import com.casaDoAmor.CasaDoAmor.model.Estoque;
+import com.casaDoAmor.CasaDoAmor.model.Medicamento;
+import com.casaDoAmor.CasaDoAmor.model.Notificacao;
+import com.casaDoAmor.CasaDoAmor.repository.EstoqueRepository;
+import com.casaDoAmor.CasaDoAmor.repository.MedicamentoRepository;
+import com.casaDoAmor.CasaDoAmor.repository.NotificacaoRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-// ------------------------------------------------
 
 @Service
 public class NotificacaoService {
@@ -33,7 +31,6 @@ public class NotificacaoService {
     }
 
     public void verificarMedicamentosCriticos() {
-        // --- 1. LÓGICA DE VENCIMENTO ---
         LocalDate dataLimiteVencimento = LocalDate.now().plusDays(30);
         List<Medicamento> vencimentosProximos = medicamentoRepo.findByValidadeLessThanEqual(dataLimiteVencimento);
 
@@ -49,7 +46,6 @@ public class NotificacaoService {
             emailService.enviarEmail(emailAdmin, assunto, notificacao.getMensagem());
         }
 
-        // --- 2. LÓGICA DE ESTOQUE ---
         List<Estoque> estoqueBaixo = estoqueRepo.findByEstoqueBaixo();
 
         for (Estoque estoque : estoqueBaixo) {

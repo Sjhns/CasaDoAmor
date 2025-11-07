@@ -1,6 +1,6 @@
-package com.CasaDoAmor.CasaDoAmor.repository;
+package com.casaDoAmor.CasaDoAmor.repository;
 
-import com.CasaDoAmor.CasaDoAmor.model.Estoque;
+import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -11,11 +11,6 @@ import java.util.UUID;
 @Repository
 public interface EstoqueRepository extends JpaRepository<Estoque, UUID> {
 
-    /**
-     * Busca por todos os estoques onde a quantidade atual
-     * é menor ou igual ao estoque mínimo definido.
-     * (O @Data em Estoque.java nos dá .getQuantidade() e .getEstoqueMinimo())
-     */
     @Query("SELECT e FROM Estoque e WHERE e.quantidade <= e.estoqueMinimo")
     List<Estoque> findByEstoqueBaixo();
     

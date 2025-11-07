@@ -1,13 +1,13 @@
-package com.CasaDoAmor.CasaDoAmor.controller;
+package com.casaDoAmor.CasaDoAmor.controller;
 
 // --- IMPORTS COMPLETOS (A CAUSA DO SEU ERRO) ---
-import com.CasaDoAmor.CasaDoAmor.model.Estoque;
-import com.CasaDoAmor.CasaDoAmor.model.Medicamento;
-import com.CasaDoAmor.CasaDoAmor.model.Notificacao;
-import com.CasaDoAmor.CasaDoAmor.repository.EstoqueRepository;
-import com.CasaDoAmor.CasaDoAmor.repository.MedicamentoRepository;
-import com.CasaDoAmor.CasaDoAmor.repository.NotificacaoRepository;
-import com.CasaDoAmor.CasaDoAmor.service.NotificacaoService;
+import com.casaDoAmor.CasaDoAmor.model.Estoque;
+import com.casaDoAmor.CasaDoAmor.model.Medicamento;
+import com.casaDoAmor.CasaDoAmor.model.Notificacao;
+import com.casaDoAmor.CasaDoAmor.repository.EstoqueRepository;
+import com.casaDoAmor.CasaDoAmor.repository.MedicamentoRepository;
+import com.casaDoAmor.CasaDoAmor.repository.NotificacaoRepository;
+import com.casaDoAmor.CasaDoAmor.service.NotificacaoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

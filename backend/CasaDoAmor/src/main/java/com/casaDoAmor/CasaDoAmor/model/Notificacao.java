@@ -1,7 +1,9 @@
-package com.CasaDoAmor.CasaDoAmor.model;
+package com.casaDoAmor.CasaDoAmor.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Data;
 
+@Data
 @Entity
 public class Notificacao {
 

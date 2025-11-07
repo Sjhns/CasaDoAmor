@@ -49,7 +49,7 @@
 [ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/service/NotificacaoService.java:[25,31] cannot find symbol
   symbol:   class MedicamentoRepository
   location: class com.CasaDoAmor.CasaDoAmor.service.NotificacaoService
-[ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/repository/EstoqueRepository.java:[20,10] cannot find symbol
+[ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/repository/EstoqueRepository.java:[15,10] cannot find symbol
   symbol:   class Estoque
   location: interface com.CasaDoAmor.CasaDoAmor.repository.EstoqueRepository
 [ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/controller/NotificacaoController.java:[4,39] cannot find symbol
@@ -279,8 +279,8 @@
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD FAILURE
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  1.617 s
-[INFO] Finished at: 2025-11-07T19:38:02-03:00
+[INFO] Total time:  1.817 s
+[INFO] Finished at: 2025-11-07T20:07:17-03:00
 [INFO] ------------------------------------------------------------------------
 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project CasaDoAmor: Compilation failure: Compilation failure: 
 [ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/service/EstoqueService.java:[8,44] cannot access com.casaDoAmor.CasaDoAmor.repository.EstoqueRepository
@@ -314,7 +314,7 @@
 [ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/service/NotificacaoService.java:[25,31] cannot find symbol
 [ERROR]   symbol:   class MedicamentoRepository
 [ERROR]   location: class com.CasaDoAmor.CasaDoAmor.service.NotificacaoService
-[ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/repository/EstoqueRepository.java:[20,10] cannot find symbol
+[ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/repository/EstoqueRepository.java:[15,10] cannot find symbol
 [ERROR]   symbol:   class Estoque
 [ERROR]   location: interface com.CasaDoAmor.CasaDoAmor.repository.EstoqueRepository
 [ERROR] /home/astra/projetos/CasaDoAmor/backend/CasaDoAmor/src/main/java/com/casaDoAmor/CasaDoAmor/controller/NotificacaoController.java:[4,39] cannot find symbol

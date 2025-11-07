@@ -1,4 +1,4 @@
-package com.CasaDoAmor.CasaDoAmor.service;
+package com.casaDoAmor.CasaDoAmor.service;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
