@@ -7,14 +7,21 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.casaDoAmor.CasaDoAmor.dto.MedicamentoDTO;
+import com.casaDoAmor.CasaDoAmor.dtoRequest.MedicamentoDTORequest;
+import com.casaDoAmor.CasaDoAmor.dtoRequest.MovimentarEstoqueDTORequest;
+import com.casaDoAmor.CasaDoAmor.dtoResponse.EstoqueDTOResponse;
+import com.casaDoAmor.CasaDoAmor.dtoResponse.MedicamentoDTOResponse;
+import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import com.casaDoAmor.CasaDoAmor.model.Medicamento;
 import com.casaDoAmor.CasaDoAmor.service.MedicamentoService;
+
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -24,45 +31,38 @@ public class MedicamentoController {
     public MedicamentoController(MedicamentoService medicamentoService) {
         this.medicamentoService = medicamentoService;
     }
-    private Medicamento paraModel(MedicamentoDTO dto) {
+    private Medicamento paraModel(MedicamentoDTORequest dto) {
         Medicamento entidade = new Medicamento();
-
+        entidade.setId(dto.getId());
         entidade.setNome(dto.getNome());
-        entidade.setLote(dto.getLote());
         entidade.setFormaFarmaceutica(dto.getFormaFarmaceutica());
         entidade.setViaDeAdministracao(dto.getViaDeAdministracao());
         entidade.setConcentracao(dto.getConcentracao());
         entidade.setCategoriaTerapeutica(dto.getCategoriaTerapeutica());
         entidade.setLaboratorioFabricante(dto.getLaboratorioFabricante());
-        entidade.setValidade(dto.getValidade());
         return entidade;
     }
-    
-    private MedicamentoDTO paraDTO(Medicamento entidade) {
-        MedicamentoDTO dto = new MedicamentoDTO();
-        dto.setNome(entidade.getNome());
-        dto.setLote(entidade.getLote());
-        dto.setFormaFarmaceutica(entidade.getFormaFarmaceutica());
-        dto.setViaDeAdministracao(entidade.getViaDeAdministracao());
-        dto.setConcentracao(entidade.getConcentracao());
-        dto.setCategoriaTerapeutica(entidade.getCategoriaTerapeutica());
-        dto.setLaboratorioFabricante(entidade.getLaboratorioFabricante());
-        dto.setValidade(entidade.getValidade());
-        dto.setId(entidade.getId());
-        return dto;
-    }
     @PostMapping
-    public ResponseEntity<UUID> salvar(@RequestBody MedicamentoDTO dto) {
+    public ResponseEntity<MedicamentoDTOResponse> salvar(@RequestBody MedicamentoDTORequest dto) {
         Medicamento entidadeParaSerSalva = paraModel(dto); 
         Medicamento entidadeSalva = medicamentoService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
+        MedicamentoDTOResponse responseDTO = MedicamentoDTOResponse.fromEntity(entidadeSalva); 
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
+    @PostMapping("/{id}/movimentacoes") 
+	public ResponseEntity<EstoqueDTOResponse> movimentarEstoque(
+		@PathVariable(value = "id") UUID medicamentoId, 
+		@RequestBody @Valid MovimentarEstoqueDTORequest dto) { 
+		Estoque estoqueAtualizado = medicamentoService.movimentarEstoque(medicamentoId, dto);
+        EstoqueDTOResponse responseDTO = EstoqueDTOResponse.fromEntity(estoqueAtualizado);
+		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+	}
     @GetMapping
-    public ResponseEntity<List<MedicamentoDTO>> listar() {
+    public ResponseEntity<List<MedicamentoDTOResponse>> listar() {
         List<Medicamento> entidades = medicamentoService.listarTodos();
-        List<MedicamentoDTO> medicamentos = entidades.stream()
-            .map(this::paraDTO)
+        List<MedicamentoDTOResponse> medicamentos = entidades.stream()
+            .map(MedicamentoDTOResponse::fromEntity)
             .collect(Collectors.toList());
         return ResponseEntity.ok(medicamentos);
-    }
+    }   
 }
