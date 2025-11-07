@@ -1,0 +1,99 @@
+package com.CasaDoAmor.CasaDoAmor.controller;
+
+// --- IMPORTS COMPLETOS (A CAUSA DO SEU ERRO) ---
+import com.CasaDoAmor.CasaDoAmor.model.Estoque;
+import com.CasaDoAmor.CasaDoAmor.model.Medicamento;
+import com.CasaDoAmor.CasaDoAmor.model.Notificacao;
+import com.CasaDoAmor.CasaDoAmor.repository.EstoqueRepository;
+import com.CasaDoAmor.CasaDoAmor.repository.MedicamentoRepository;
+import com.CasaDoAmor.CasaDoAmor.repository.NotificacaoRepository;
+import com.CasaDoAmor.CasaDoAmor.service.NotificacaoService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.time.LocalDate;
+import java.util.List;
+// ------------------------------------------------
+
+@RestController
+@RequestMapping("/api/notificacoes")
+public class NotificacaoController {
+
+    private final NotificacaoService notificacaoService;
+    private final NotificacaoRepository notificacaoRepository;
+    private final MedicamentoRepository medicamentoRepository;
+    private final EstoqueRepository estoqueRepository; 
+
+    public NotificacaoController(NotificacaoService notificacaoService,
+                                 NotificacaoRepository notificacaoRepository,
+                                 MedicamentoRepository medicamentoRepository,
+                                 EstoqueRepository estoqueRepository) {
+        this.notificacaoService = notificacaoService;
+        this.notificacaoRepository = notificacaoRepository;
+        this.medicamentoRepository = medicamentoRepository;
+        this.estoqueRepository = estoqueRepository;
+    }
+
+    @GetMapping
+    public List<Notificacao> listarNotificacoes() {
+        return notificacaoRepository.findAll();
+    }
+
+    // --- ENDPOINTS DE TESTE (TEMPORÁRIOS) ---
+
+    @GetMapping("/gerar-dados-teste")
+    public ResponseEntity<String> gerarDadosTeste() {
+        try {
+            // --- Cenário 1: Medicamento de Vencimento ---
+            Medicamento medVencendo = new Medicamento();
+            medVencendo.setNome("Dipirona Vencendo");
+            medVencendo.setLote("LOTE_VENCE");
+            medVencendo.setValidade(LocalDate.now().plusDays(5));
+            medVencendo.setFormaFarmaceutica("Comprimido");
+            medVencendo.setViaDeAdministracao("Oral");
+            medVencendo.setConcentracao("500mg");
+            medVencendo.setCategoriaTerapeutica("Analgesico");
+            medVencendo.setLaboratorioFabricante("Medley");
+            medicamentoRepository.save(medVencendo);
+
+            // --- Cenário 2: Medicamento + Estoque Baixo ---
+            Medicamento medEstoque = new Medicamento();
+            medEstoque.setNome("Paracetamol Acabando");
+            medEstoque.setLote("LOTE_ESTOQUE");
+            medEstoque.setValidade(LocalDate.now().plusYears(1));
+            medEstoque.setFormaFarmaceutica("Comprimido");
+            medEstoque.setViaDeAdministracao("Oral");
+            medEstoque.setConcentracao("750mg");
+            medEstoque.setCategoriaTerapeutica("Analgesico");
+            medEstoque.setLaboratorioFabricante("EMS");
+            medicamentoRepository.save(medEstoque);
+
+            Estoque estoqueBaixo = new Estoque();
+            estoqueBaixo.setQuantidade(5L);
+            estoqueBaixo.setEstoqueMinimo(10L);
+            estoqueBaixo.setEstoqueMaximo(50L);
+            estoqueBaixo.setStatus("ATIVO");
+            estoqueBaixo.setMedicamento(medEstoque);
+            estoqueRepository.save(estoqueBaixo);
+
+            return ResponseEntity.ok("DADOS DE TESTE (VENCIMENTO E ESTOQUE) CRIADOS. " + 
+                                      "Execute /api/notificacoes/testar-verificacao");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Erro ao criar dado de teste: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/testar-verificacao")
+    public ResponseEntity<String> testarVerificacaoManual() {
+        try {
+            notificacaoService.verificarMedicamentosCriticos();
+            return ResponseEntity.ok("Verificação executada com sucesso! " +
+                                      "Confira seu e-mail (2) e o endpoint /api/notificacoes (2).");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Erro ao executar verificação: " + e.getMessage());
+        }
+    }
+}
