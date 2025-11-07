@@ -1,6 +1,5 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.casaDoAmor.CasaDoAmor.dto.DoadorDTO;
+import com.casaDoAmor.CasaDoAmor.dtoRequest.DoadorDTORequest;
+import com.casaDoAmor.CasaDoAmor.dtoResponse.DoadorDTOResponse;
 import com.casaDoAmor.CasaDoAmor.model.Doador;
 import com.casaDoAmor.CasaDoAmor.service.DoadorService;
 
@@ -18,41 +18,30 @@ import com.casaDoAmor.CasaDoAmor.service.DoadorService;
 @RequestMapping("/doador")
 public class DoadorController {
     DoadorService doadorService;
-
     public DoadorController(DoadorService doadorService) {
         this.doadorService = doadorService;
     }
-
-    private Doador paraModel(DoadorDTO dto) {
+    private Doador paraModel(DoadorDTORequest dto) {
         Doador entidade = new Doador();
+        entidade.setId(dto.getId());
         entidade.setCpfCnpj(dto.getCpfCnpj());
         entidade.setNome(dto.getNome());
         entidade.setEmail(dto.getEmail());
         entidade.setTelefone(dto.getTelefone());
         return entidade;
     }
-    private DoadorDTO paraDTO(Doador entidade) {
-        DoadorDTO dto = new DoadorDTO();
-        dto.setCpfCnpj(entidade.getCpfCnpj());
-        dto.setNome(entidade.getNome());
-        dto.setEmail(entidade.getEmail());
-        dto.setTelefone(entidade.getTelefone());
-        dto.setId(entidade.getId());
-
-        return dto;
-    }
-
     @PostMapping
-    public ResponseEntity<UUID> salvar(@RequestBody DoadorDTO dto) {
+    public ResponseEntity<DoadorDTOResponse> salvar(@RequestBody DoadorDTORequest dto) {
         Doador entidadeParaSerSalva = paraModel(dto); 
         Doador entidadeSalva = doadorService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
+        DoadorDTOResponse responseDTO = DoadorDTOResponse.fromEntity(entidadeSalva); 
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
     @GetMapping
-    public ResponseEntity<List<DoadorDTO>> listar() {
+    public ResponseEntity<List<DoadorDTOResponse>> listar() {
         List<Doador> entidades = doadorService.listarTodos();
-        List<DoadorDTO> doadores = entidades.stream()
-            .map(this::paraDTO)
+        List<DoadorDTOResponse> doadores = entidades.stream()
+            .map(DoadorDTOResponse::fromEntity) 
             .collect(Collectors.toList());
         return ResponseEntity.ok(doadores);
     }
