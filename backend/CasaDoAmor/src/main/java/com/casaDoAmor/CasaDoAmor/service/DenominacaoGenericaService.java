@@ -7,8 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.casaDoAmor.CasaDoAmor.model.DenominacaoGenerica;
 import com.casaDoAmor.CasaDoAmor.repository.DenominacaoGenericaRepository;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DenominacaoGenericaService {
