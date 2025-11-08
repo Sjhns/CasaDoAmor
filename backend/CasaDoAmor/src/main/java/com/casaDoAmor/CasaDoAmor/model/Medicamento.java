@@ -1,11 +1,12 @@
 package com.casaDoAmor.CasaDoAmor.model;
+
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.Data;
-import java.util.UUID;
 import java.time.LocalDate;
+import java.util.UUID;
+import lombok.Data;
 
 @Data
 @Entity

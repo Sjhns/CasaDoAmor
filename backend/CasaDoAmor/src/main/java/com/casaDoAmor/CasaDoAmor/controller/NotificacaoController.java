@@ -1,6 +1,5 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 
-// --- IMPORTS COMPLETOS (A CAUSA DO SEU ERRO) ---
 import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import com.casaDoAmor.CasaDoAmor.model.Medicamento;
 import com.casaDoAmor.CasaDoAmor.model.Notificacao;
@@ -12,9 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import java.util.List;
-// ------------------------------------------------
 
 @RestController
 @RequestMapping("/api/notificacoes")
@@ -40,12 +40,10 @@ public class NotificacaoController {
         return notificacaoRepository.findAll();
     }
 
-    // --- ENDPOINTS DE TESTE (TEMPORÁRIOS) ---
-
+    @Profile("dev")
     @GetMapping("/gerar-dados-teste")
     public ResponseEntity<String> gerarDadosTeste() {
         try {
-            // --- Cenário 1: Medicamento de Vencimento ---
             Medicamento medVencendo = new Medicamento();
             medVencendo.setNome("Dipirona Vencendo");
             medVencendo.setLote("LOTE_VENCE");
@@ -57,7 +55,6 @@ public class NotificacaoController {
             medVencendo.setLaboratorioFabricante("Medley");
             medicamentoRepository.save(medVencendo);
 
-            // --- Cenário 2: Medicamento + Estoque Baixo ---
             Medicamento medEstoque = new Medicamento();
             medEstoque.setNome("Paracetamol Acabando");
             medEstoque.setLote("LOTE_ESTOQUE");
@@ -85,6 +82,7 @@ public class NotificacaoController {
         }
     }
 
+    @Profile("dev")
     @GetMapping("/testar-verificacao")
     public ResponseEntity<String> testarVerificacaoManual() {
         try {

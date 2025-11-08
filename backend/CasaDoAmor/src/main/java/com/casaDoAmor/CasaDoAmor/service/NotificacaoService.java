@@ -32,7 +32,7 @@ public class NotificacaoService {
 
     public void verificarMedicamentosCriticos() {
         LocalDate dataLimiteVencimento = LocalDate.now().plusDays(30);
-        List<Medicamento> vencimentosProximos = medicamentoRepo.findByValidadeLessThanEqual(dataLimiteVencimento);
+        List<Medicamento> vencimentosProximos = medicamentoRepo.buscarPorVencimentoAntesDe(dataLimiteVencimento);
 
         for (Medicamento med : vencimentosProximos) {
             Notificacao notificacao = new Notificacao();
@@ -45,7 +45,6 @@ public class NotificacaoService {
             String assunto = "[ALERTA] Vencimento Próximo: " + med.getNome();
             emailService.enviarEmail(emailAdmin, assunto, notificacao.getMensagem());
         }
-
         List<Estoque> estoqueBaixo = estoqueRepo.findByEstoqueBaixo();
 
         for (Estoque estoque : estoqueBaixo) {

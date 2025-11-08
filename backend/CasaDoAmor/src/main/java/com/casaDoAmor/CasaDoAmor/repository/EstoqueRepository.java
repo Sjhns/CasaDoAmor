@@ -10,8 +10,10 @@ import java.util.UUID;
 
 @Repository
 public interface EstoqueRepository extends JpaRepository<Estoque, UUID> {
-
+    Estoque findByQuantidade(long quantidade);
+    Estoque findByEstoqueMaximo(long estoqueMaximo);
+    Estoque findByEstoqueMinimo(long estoqueMinimo);
+    Estoque findByStatus(String status);
     @Query("SELECT e FROM Estoque e WHERE e.quantidade <= e.estoqueMinimo")
     List<Estoque> findByEstoqueBaixo();
-    
 }

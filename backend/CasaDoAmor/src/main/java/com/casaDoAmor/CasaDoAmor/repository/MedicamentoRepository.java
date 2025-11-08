@@ -1,13 +1,14 @@
-package com.casaDoAmor.CasaDoAmor.repository;
-import org.springframework.data.jpa.repository.JpaRepository;
+package com.casaDoAmor.CasaDoAmor.repository; 
+
 import com.casaDoAmor.CasaDoAmor.model.Medicamento;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.time.LocalDate;
-
-
+import org.springframework.data.jpa.repository.Query;
 
 @Repository
 public interface MedicamentoRepository extends JpaRepository<Medicamento, UUID> {
@@ -20,6 +21,7 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, UUID> 
     Medicamento findByCategoriaTerapeutica(String categoriaTerapeutica);
     Medicamento findByLaboratorioFabricante(String laboratorioFabricante);
     Medicamento findByValidade(LocalDate validade);
-    List<Medicamento> findByEstoqueBaixo();
     List<Medicamento> findByValidadeLessThanEqual(LocalDate dataLimite);
+    @Query("SELECT m FROM Medicamento m WHERE m.validade <= :dataLimite")
+    List<Medicamento> buscarPorVencimentoAntesDe(@Param("dataLimite") LocalDate dataLimite);
 }
