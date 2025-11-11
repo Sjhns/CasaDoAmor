@@ -1,4 +1,4 @@
-import styles from './styles/MedicationFormModal.module.css';
+// 1. O 'import styles' foi removido. Não é mais necessário.
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
@@ -50,68 +50,123 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
         }
     };
 
-    // Em: MedicationFormModal.tsx
+    // --- CLASSES DO TAILWIND APLICADAS ABAIXO ---
 
     return (
-    <div className={styles.modalBackdrop} onClick={onClose}>
+    // .modalBackdrop
+    <div 
+        className="fixed top-0 left-0 w-screen h-screen z-[100] flex justify-center items-center bg-black/20" 
+        onClick={onClose}
+    >
         
-        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        {/* .modalContent */}
+        <div 
+            className="bg-white p-6 rounded-[10px] shadow-[0_5px_20px_rgba(0,0,0,0.25)] w-[90%] max-w-[500px] max-h-[90vh] overflow-y-auto z-[101]" 
+            onClick={(e) => e.stopPropagation()}
+        >
             
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className={styles.formField}>
-                    <label>Nome da Caixa</label>
-                    <input type="text" {...register('nome')}/>
-                    {errors.nome && <p className={styles.error}>{errors.nome.message}</p>}
+            {/* .modalContent form */}
+            <form 
+                className="flex flex-col gap-4" 
+                onSubmit={handleSubmit(onSubmit)}
+            >
+                {/* .formField */}
+                <div className="flex flex-col gap-1">
+                    {/* .modalContent label */}
+                    <label className="font-semibold text-[0.9rem] text-[#333] text-left">Nome da Caixa</label>
+                    {/* input[type="text"] */}
+                    <input 
+                        type="text" 
+                        className="p-3 border-none rounded-lg text-base w-full box-border bg-[#e9e9e9] text-black h-10"
+                        {...register('nome')}
+                    />
+                    {/* .error */}
+                    {errors.nome && <p className="text-[#d93025] text-[0.8rem] m-0 text-left">{errors.nome.message}</p>}
                 </div>
 
-                {/* E aqui */}
-                <div className={styles.formField}>
-                    <label>Nome Genérico</label>
-                    <input type="text" {...register('nomeGenerico')}/>
-                    {errors.nomeGenerico && <p className={styles.error}>{errors.nomeGenerico.message}</p>}
+                <div className="flex flex-col gap-1">
+                    <label className="font-semibold text-[0.9rem] text-[#333] text-left">Nome Genérico</label>
+                    <input 
+                        type="text" 
+                        className="p-3 border-none rounded-lg text-base w-full box-border bg-[#e9e9e9] text-black h-10"
+                        {...register('nomeGenerico')}
+                    />
+                    {errors.nomeGenerico && <p className="text-[#d93025] text-[0.8rem] m-0 text-left">{errors.nomeGenerico.message}</p>}
                 </div>
 
-                {/* E aqui */}
-                <div className={styles.formField}>
-                    <label>Apelido</label>
-                    <input type="text" {...register('apelido')}/>
+                <div className="flex flex-col gap-1">
+                    <label className="font-semibold text-[0.9rem] text-[#333] text-left">Apelido</label>
+                    <input 
+                        type="text" 
+                        className="p-3 border-none rounded-lg text-base w-full box-border bg-[#e9e9e9] text-black h-10"
+                        {...register('apelido')}
+                    />
                 </div>
                 
-                {/* E aqui */}
-                <div className={styles.formField}>
-                    <label>Código</label>
-                    <input type="text" {...register('codigo')}/>
-                    {errors.codigo && <p className={styles.error}>{errors.codigo.message}</p>}
+                <div className="flex flex-col gap-1">
+                    <label className="font-semibold text-[0.9rem] text-[#333] text-left">Código</label>
+                    <input 
+                        type="text" 
+                        className="p-3 border-none rounded-lg text-base w-full box-border bg-[#e9e9e9] text-black h-10"
+                        {...register('codigo')}
+                    />
+                    {errors.codigo && <p className="text-[#d93025] text-[0.8rem] m-0 text-left">{errors.codigo.message}</p>}
                 </div>
 
-                <div className={styles.containerLadoALado}>
+                {/* .containerLadoALado */}
+                <div className="flex flex-row gap-4">
 
-                    <div className={styles.itemLadoALado}>
-                        <label>Validade</label>
-                        <input type="date" {...register('validade')}/>
-                        {errors.validade && <p className={styles.error}>{errors.validade.message}</p>}
+                    {/* .itemLadoALado */}
+                    <div className="flex-1 flex flex-col gap-1 box-border">
+                        <label className="font-semibold text-[0.9rem] text-[#333] text-left">Validade</label>
+                        {/* input[type="date"] */}
+                        <input 
+                            type="date" 
+                            className="p-3 border-none rounded-lg text-base w-full box-border bg-[#e9e9e9] text-black h-10"
+                            {...register('validade')}
+                        />
+                        {errors.validade && <p className="text-[#d93025] text-[0.8rem] m-0 text-left">{errors.validade.message}</p>}
                     </div>
                     
-                    <div className={styles.itemLadoALado}>
-                        <label>Lote</label>
-                        <input type="text" {...register('lote')}/>
-                        {errors.lote && <p className={styles.error}>{errors.lote.message}</p>}
+                    <div className="flex-1 flex flex-col gap-1 box-border">
+                        <label className="font-semibold text-[0.9rem] text-[#333] text-left">Lote</label>
+                        <input 
+                            type="text" 
+                            className="p-3 border-none rounded-lg text-base w-full box-border bg-[#e9e9e9] text-black h-10"
+                            {...register('lote')}
+                        />
+                        {errors.lote && <p className="text-[#d93025] text-[0.8rem] m-0 text-left">{errors.lote.message}</p>}
                     </div>
 
                 </div>
 
-                <div className={styles.formField}>
-                    <label>Descrição</label>
+                <div className="flex flex-col gap-1">
+                    <label className="font-semibold text-[0.9rem] text-[#333] text-left">Descrição</label>
+                    {/* .descricaoTextarea */}
                     <textarea 
-                        className={styles.descricaoTextarea} 
+                        className="p-3 border-none rounded-lg text-base w-full box-border bg-[#e9e9e9] text-black font-sans resize-y min-h-20" 
                         {...register('descricao')} 
                         rows={4} 
                     />
                 </div>
 
-                <div className={styles.botoesContainer}>
-                    <button type="button" onClick={onClose}>Cancelar</button>
-                    <button type="submit">{medicationData ? 'Editar' : 'Adicionar'}</button>
+                {/* .botoesContainer */}
+                <div className="flex flex-row justify-end gap-[150px] mt-4 border-t border-[#eee] pt-4">
+                    {/* button[type="button"] */}
+                    <button 
+                        type="button" 
+                        className="bg-[rgb(229,11,11)] text-white px-6 py-1 min-w-[175px] border border-[#ccc] rounded-md text-base cursor-pointer transition-colors duration-200 hover:bg-[rgb(182,12,12)]"
+                        onClick={onClose}
+                    >
+                        Cancelar
+                    </button>
+                    {/* button[type="submit"] */}
+                    <button 
+                        type="submit" 
+                        className="bg-[#007bff] text-white px-6 py-1 min-w-[175px] border-none leading-none rounded-md text-base font-semibold cursor-pointer transition-colors duration-200 hover:bg-[#0056b3]"
+                    >
+                        {medicationData ? 'Editar' : 'Adicionar'}
+                    </button>
                 </div>
 
             </form>
