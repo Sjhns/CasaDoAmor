@@ -85,8 +85,7 @@ export const Dashboard = () => {
   const remediosFiltrados = remedios.filter(
     (remedio) =>
       remedio.nome.toLowerCase().includes(tabelaBuscaQuery.toLowerCase()) ||
-      remedio.lote.toLowerCase().includes(tabelaBuscaQuery.toLowerCase()) ||
-      remedio.tipo.toLowerCase().includes(tabelaBuscaQuery.toLowerCase())
+      remedio.lote.toLowerCase().includes(tabelaBuscaQuery.toLowerCase())
   );
 
   const handleOpenCreateModal = () => {
@@ -117,16 +116,8 @@ export const Dashboard = () => {
   }
 
   return (
-    <>
-      {/* <div className="min-h-screen bg-sky-600 flex"> */}
-
-      {/* Barra Lateral */}
-
-      {/* 
-
-      {/* Conteúdo Principal */}
-
-      <header className="bg-sky-500 px-10 py-2  flex items-center justify-between">
+    <div className="min-h-screen">
+      <header className="bg-sky-500 px-10 py-2 flex items-center justify-between">
         <div className="flex-1 max-w-xl  mx-auto">
           <div className="relative ">
             <input
@@ -148,18 +139,18 @@ export const Dashboard = () => {
             <p className="text-sky-100 text-xs">Administrador</p>
           </div>
           <div className="w-14 h-14 flex items-center justify-center border-white rounded-full bg-white hover:bg-sky-50 transition-colors cursor-pointer">
-            <img 
-              src="https://api.dicebear.com/9.x/adventurer/svg?seed=CasaDoAmor" 
-              alt="User" 
-              className="w-full h-full rounded-full object-cover" 
-            /> 
+            <img
+              src="https://api.dicebear.com/9.x/adventurer/svg?seed=CasaDoAmor"
+              alt="User"
+              className="w-full h-full rounded-full object-cover"
+            />
           </div>
         </div>
       </header>
 
-      <div className="flex bg-gray-50">
+      <div className="flex bg-gray-50 h-screen">
         {/* Barra lateral */}
-        <aside className="w-56 p-6 flex flex-col border-r border-gray-300 shadow-md">
+        <aside className="min-w-52 p-6 flex flex-col border-r border-gray-300 shadow-md min-h-screen h-full">
           {/* <div className="mb-12 flex items-center justify-center">
             <div className="w-16 h-16 rounded-full flex items-center justify-center">
               <div className="relative">
@@ -185,8 +176,8 @@ export const Dashboard = () => {
         </aside>
 
         {/* Área de Conteúdo */}
-        <main className="flex-1 bg-gray-50 p-8">
-          <div className="bg-white rounded-2xl shadow-sm p-8 h-full">
+        <main className="bg-gray-50 p-3 w-[calc(100%-208px)]">
+          <div className="bg-white rounded-2xl shadow-sm p-8">
             {/* <div> */}
             <h1 className="text-3xl font-bold text-gray-900 mb-8">
               Estoque geral de remédios
@@ -221,6 +212,8 @@ export const Dashboard = () => {
             {/* Tabela */}
             <div className="overflow-x-auto">
               <table className="w-full rounded-2xl overflow-hidden">
+
+                
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
@@ -313,11 +306,21 @@ export const Dashboard = () => {
             </div>
 
             <div className="mt-8">
-              {!error && remediosFiltrados.length === 0 && (
+              {!error && tabelaBuscaQuery && remediosFiltrados.length === 0 && (
                 <span className="text-gray-700 text-lg text-center block">
                   Nenhum remédio encontrado para "{tabelaBuscaQuery}"
                 </span>
               )}
+            </div>
+
+            <div className="mt-8">
+              {!error &&
+                !tabelaBuscaQuery &&
+                remediosFiltrados.length === 0 && (
+                  <span className="text-gray-700 text-lg text-center block">
+                    Nenhum remédio cadastrado no momento.
+                  </span>
+                )}
             </div>
 
             {error && (
@@ -340,7 +343,11 @@ export const Dashboard = () => {
             )}
           </div>
         </main>
+
+
       </div>
+
+
       {/* </div> */}
 
       {isModalOpen && (
@@ -349,6 +356,10 @@ export const Dashboard = () => {
           onClose={handleCloseModal}
         />
       )}
-    </>
+
+
+      {/* crie rodape */}
+      
+    </div>
   );
 };
