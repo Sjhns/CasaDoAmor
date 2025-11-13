@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.casaDoAmor.CasaDoAmor.dtoRequest.UsuarioDTORequest;
-import com.casaDoAmor.CasaDoAmor.dtoResponse.UsuarioDTOResponse;
+import com.casaDoAmor.CasaDoAmor.dtoAtualizar.UsuarioDTOAtualizar;
+import com.casaDoAmor.CasaDoAmor.dtoResposta.UsuarioDTOResposta;
 import com.casaDoAmor.CasaDoAmor.model.Usuario;
 import com.casaDoAmor.CasaDoAmor.service.UsuarioService;
 
@@ -23,7 +23,7 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
-    private Usuario paraModel(UsuarioDTORequest dto) {
+    private Usuario paraModel(UsuarioDTOAtualizar dto) {
         Usuario entidade = new Usuario();
         entidade.setId(dto.getId());
         entidade.setNome(dto.getNome());
@@ -31,18 +31,17 @@ public class UsuarioController {
         return entidade;
     }
     @PostMapping
-    public ResponseEntity<UsuarioDTOResponse> salvar(@RequestBody UsuarioDTORequest dto) {
+    public ResponseEntity<UsuarioDTOResposta> salvar(@RequestBody UsuarioDTOAtualizar dto) {
         Usuario entidadeParaSerSalva = paraModel(dto); 
         Usuario entidadeSalva = usuarioService.salvar(entidadeParaSerSalva);
-        UsuarioDTOResponse responseDTO = UsuarioDTOResponse.fromEntity(entidadeSalva);
+        UsuarioDTOResposta responseDTO = UsuarioDTOResposta.fromEntity(entidadeSalva);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
-    
     @GetMapping
-    public ResponseEntity<List<UsuarioDTOResponse>> listar() {
+    public ResponseEntity<List<UsuarioDTOResposta>> listar() {
         List<Usuario> entidades = usuarioService.listarTodos();
-        List<UsuarioDTOResponse> usuarios = entidades.stream()
-            .map(UsuarioDTOResponse::fromEntity)
+        List<UsuarioDTOResposta> usuarios = entidades.stream()
+            .map(UsuarioDTOResposta::fromEntity)
             .collect(Collectors.toList());
         return ResponseEntity.ok(usuarios);
     }
