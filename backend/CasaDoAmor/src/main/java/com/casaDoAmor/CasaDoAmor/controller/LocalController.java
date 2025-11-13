@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.casaDoAmor.CasaDoAmor.dtoRequest.LocalDTORequest;
-import com.casaDoAmor.CasaDoAmor.dtoResponse.LocalDTOResponse;
+import com.casaDoAmor.CasaDoAmor.dtoAtualizar.LocalDTOAtualizar;
+import com.casaDoAmor.CasaDoAmor.dtoResposta.LocalDTOResposta;
 import com.casaDoAmor.CasaDoAmor.model.Local;
 import com.casaDoAmor.CasaDoAmor.service.LocalService;
 
@@ -23,24 +23,24 @@ public class LocalController {
     public LocalController(LocalService localService) {
         this.localService = localService;
     }
-    private Local paraModel(LocalDTORequest dto) {
+    private Local paraModel(LocalDTOAtualizar dto) {
         Local entidade = new Local();
         entidade.setId(dto.getId());
         entidade.setNome(dto.getNome());
         return entidade;
     }
     @PostMapping
-    public ResponseEntity<LocalDTOResponse> salvar(@RequestBody LocalDTORequest dto) {
+    public ResponseEntity<LocalDTOResposta> salvar(@RequestBody LocalDTOAtualizar dto) {
         Local entidadeParaSerSalva = paraModel(dto); 
         Local entidadeSalva = localService.salvar(entidadeParaSerSalva);
-        LocalDTOResponse responseDTO = LocalDTOResponse.fromEntity(entidadeSalva); 
+        LocalDTOResposta responseDTO = LocalDTOResposta.fromEntity(entidadeSalva); 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
     @GetMapping
-    public ResponseEntity<List<LocalDTOResponse>> listar() {
+    public ResponseEntity<List<LocalDTOResposta>> listar() {
         List<Local> entidades = localService.listarTodos();
-        List<LocalDTOResponse> locais = entidades.stream()
-            .map(LocalDTOResponse::fromEntity)
+        List<LocalDTOResposta> locais = entidades.stream()
+            .map(LocalDTOResposta::fromEntity)
             .collect(Collectors.toList());
         return ResponseEntity.ok(locais);
     }
