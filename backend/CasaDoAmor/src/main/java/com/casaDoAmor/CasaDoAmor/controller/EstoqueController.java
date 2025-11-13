@@ -4,48 +4,35 @@ import java.util.stream.Collectors;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.casaDoAmor.CasaDoAmor.dtoRequest.EstoqueDTORequest;
-import com.casaDoAmor.CasaDoAmor.dtoResponse.EstoqueDTOResponse;
+import com.casaDoAmor.CasaDoAmor.dtoCriar.EstoqueDTOCriar;
+import com.casaDoAmor.CasaDoAmor.dtoListar.EstoqueDTOListar; 
+import com.casaDoAmor.CasaDoAmor.dtoResposta.EstoqueDTOResposta; 
 import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import com.casaDoAmor.CasaDoAmor.service.EstoqueService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/estoque")
 public class EstoqueController {
-    EstoqueService estoqueService;
+    private final EstoqueService estoqueService;
     public EstoqueController(EstoqueService estoqueService) {
         this.estoqueService = estoqueService;
     }
-    private Estoque paraModel(EstoqueDTORequest dto) {
-        Estoque entidade = new Estoque();
-        entidade.setId(dto.getId());
-        entidade.setQuantidade(dto.getQuantidade());
-        entidade.setEstoqueMinimo(dto.getEstoqueMinimo());
-        entidade.setEstoqueMaximo(dto.getEstoqueMaximo());
-        entidade.setStatus(dto.getStatus());
-        entidade.setLote(dto.getLote());
-        entidade.setValidadeAposAberto(dto.getValidadeAposAberto());
-        return entidade;
-    }
     @PostMapping
-	public ResponseEntity<EstoqueDTOResponse> salvar(@RequestBody EstoqueDTORequest dto) {
-		Estoque entidadeParaSerSalva = paraModel(dto); 
-		Estoque entidadeSalva = estoqueService.salvar(entidadeParaSerSalva);
-        EstoqueDTOResponse responseDTO = EstoqueDTOResponse.fromEntity(entidadeSalva);
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
-	}
-	@GetMapping
-	public ResponseEntity<List<EstoqueDTOResponse>> listar() {
-		List<Estoque> entidades = estoqueService.listarTodos();
-		List<EstoqueDTOResponse> itens = entidades.stream()
-			.map(EstoqueDTOResponse::fromEntity)
-			.collect(Collectors.toList());
-		return ResponseEntity.ok(itens);
-	}
+    public ResponseEntity<EstoqueDTOResposta> salvar(@Valid @RequestBody EstoqueDTOCriar dto) { 
+        Estoque novoEstoqueSalvo = estoqueService.salvar(dto); 
+        EstoqueDTOResposta dtoResposta = EstoqueDTOResposta.fromEntity(novoEstoqueSalvo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dtoResposta);
+    }
+    @GetMapping
+    public ResponseEntity<List<EstoqueDTOListar>> listar() { 
+        List<Estoque> entidades = estoqueService.listarTodos();
+        List<EstoqueDTOListar> dtosListar = entidades.stream()
+            .map(EstoqueDTOListar::fromEntity)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtosListar);
+    }
 }
