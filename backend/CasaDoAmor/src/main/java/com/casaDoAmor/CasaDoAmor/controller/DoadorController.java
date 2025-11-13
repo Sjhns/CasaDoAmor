@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.casaDoAmor.CasaDoAmor.dtoRequest.DoadorDTORequest;
-import com.casaDoAmor.CasaDoAmor.dtoResponse.DoadorDTOResponse;
+import com.casaDoAmor.CasaDoAmor.dtoAtualizar.DoadorDTOAtualizar;
+import com.casaDoAmor.CasaDoAmor.dtoResposta.DoadorDTOResposta;
 import com.casaDoAmor.CasaDoAmor.model.Doador;
 import com.casaDoAmor.CasaDoAmor.service.DoadorService;
 
@@ -21,7 +21,7 @@ public class DoadorController {
     public DoadorController(DoadorService doadorService) {
         this.doadorService = doadorService;
     }
-    private Doador paraModel(DoadorDTORequest dto) {
+    private Doador paraModel(DoadorDTOAtualizar dto) {
         Doador entidade = new Doador();
         entidade.setId(dto.getId());
         entidade.setCpfCnpj(dto.getCpfCnpj());
@@ -31,17 +31,17 @@ public class DoadorController {
         return entidade;
     }
     @PostMapping
-    public ResponseEntity<DoadorDTOResponse> salvar(@RequestBody DoadorDTORequest dto) {
+    public ResponseEntity<DoadorDTOResposta> salvar(@RequestBody DoadorDTOAtualizar dto) {
         Doador entidadeParaSerSalva = paraModel(dto); 
         Doador entidadeSalva = doadorService.salvar(entidadeParaSerSalva);
-        DoadorDTOResponse responseDTO = DoadorDTOResponse.fromEntity(entidadeSalva); 
+        DoadorDTOResposta responseDTO = DoadorDTOResposta.fromEntity(entidadeSalva); 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
     @GetMapping
-    public ResponseEntity<List<DoadorDTOResponse>> listar() {
+    public ResponseEntity<List<DoadorDTOResposta>> listar() {
         List<Doador> entidades = doadorService.listarTodos();
-        List<DoadorDTOResponse> doadores = entidades.stream()
-            .map(DoadorDTOResponse::fromEntity) 
+        List<DoadorDTOResposta> doadores = entidades.stream()
+            .map(DoadorDTOResposta::fromEntity) 
             .collect(Collectors.toList());
         return ResponseEntity.ok(doadores);
     }
