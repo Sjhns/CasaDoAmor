@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.casaDoAmor.CasaDoAmor.dtoRequest.MedicamentoDTORequest;
-import com.casaDoAmor.CasaDoAmor.dtoRequest.MovimentarEstoqueDTORequest;
-import com.casaDoAmor.CasaDoAmor.dtoResponse.EstoqueDTOResponse;
-import com.casaDoAmor.CasaDoAmor.dtoResponse.MedicamentoDTOResponse;
+import com.casaDoAmor.CasaDoAmor.dtoAtualizar.MovimentarEstoqueDTOAtualizar;
+import com.casaDoAmor.CasaDoAmor.dtoCriar.MedicamentoDTOCriar;
+import com.casaDoAmor.CasaDoAmor.dtoListar.MedicamentoDTOListar;
+import com.casaDoAmor.CasaDoAmor.dtoResposta.EstoqueDTOResposta;
+import com.casaDoAmor.CasaDoAmor.dtoResposta.MedicamentoDTOResposta;
 import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import com.casaDoAmor.CasaDoAmor.model.Medicamento;
 import com.casaDoAmor.CasaDoAmor.service.MedicamentoService;
@@ -31,38 +31,27 @@ public class MedicamentoController {
     public MedicamentoController(MedicamentoService medicamentoService) {
         this.medicamentoService = medicamentoService;
     }
-    private Medicamento paraModel(MedicamentoDTORequest dto) {
-        Medicamento entidade = new Medicamento();
-        entidade.setId(dto.getId());
-        entidade.setNome(dto.getNome());
-        entidade.setFormaFarmaceutica(dto.getFormaFarmaceutica());
-        entidade.setViaDeAdministracao(dto.getViaDeAdministracao());
-        entidade.setConcentracao(dto.getConcentracao());
-        entidade.setCategoriaTerapeutica(dto.getCategoriaTerapeutica());
-        entidade.setLaboratorioFabricante(dto.getLaboratorioFabricante());
-        return entidade;
-    }
     @PostMapping
-    public ResponseEntity<MedicamentoDTOResponse> salvar(@RequestBody MedicamentoDTORequest dto) {
-        Medicamento entidadeParaSerSalva = paraModel(dto); 
-        Medicamento entidadeSalva = medicamentoService.salvar(entidadeParaSerSalva);
-        MedicamentoDTOResponse responseDTO = MedicamentoDTOResponse.fromEntity(entidadeSalva); 
+    public ResponseEntity<MedicamentoDTOResposta> salvar(@Valid @RequestBody MedicamentoDTOCriar dto) { 
+        Medicamento novoMedicamentoSalvo = medicamentoService.salvar(dto);
+        MedicamentoDTOResposta responseDTO = MedicamentoDTOResposta.fromEntity(novoMedicamentoSalvo); 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
-    @PostMapping("/{id}/movimentacoes") 
-	public ResponseEntity<EstoqueDTOResponse> movimentarEstoque(
-		@PathVariable(value = "id") UUID medicamentoId, 
-		@RequestBody @Valid MovimentarEstoqueDTORequest dto) { 
-		Estoque estoqueAtualizado = medicamentoService.movimentarEstoque(medicamentoId, dto);
-        EstoqueDTOResponse responseDTO = EstoqueDTOResponse.fromEntity(estoqueAtualizado);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-	}
+    @PostMapping("/{estoqueId}/movimentar") 
+    public ResponseEntity<EstoqueDTOResposta> movimentarEstoque(@PathVariable(value = "estoqueId") UUID estoqueId, @RequestBody @Valid MovimentarEstoqueDTOAtualizar dto) { 
+        Estoque estoqueAtualizado = medicamentoService.movimentarEstoque(estoqueId, dto);
+        if (estoqueAtualizado == null) {
+            return ResponseEntity.noContent().build(); 
+        }
+        EstoqueDTOResposta responseDTO = EstoqueDTOResposta.fromEntity(estoqueAtualizado);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+    }
     @GetMapping
-    public ResponseEntity<List<MedicamentoDTOResponse>> listar() {
+    public ResponseEntity<List<MedicamentoDTOListar>> listar() {
         List<Medicamento> entidades = medicamentoService.listarTodos();
-        List<MedicamentoDTOResponse> medicamentos = entidades.stream()
-            .map(MedicamentoDTOResponse::fromEntity)
+        List<MedicamentoDTOListar> dtosListar = entidades.stream()
+            .map(MedicamentoDTOListar::fromEntity)
             .collect(Collectors.toList());
-        return ResponseEntity.ok(medicamentos);
-    }   
+        return ResponseEntity.ok(dtosListar);
+    }
 }
