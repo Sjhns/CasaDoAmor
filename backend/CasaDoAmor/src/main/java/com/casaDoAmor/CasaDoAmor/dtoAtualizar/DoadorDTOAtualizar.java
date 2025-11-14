@@ -1,4 +1,4 @@
-package com.casaDoAmor.CasaDoAmor.dto;
+package com.casaDoAmor.CasaDoAmor.dtoAtualizar;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.UUID;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 
 @Getter
 @Setter
-public class DoadorDTO {
+public class DoadorDTOAtualizar {
     private UUID id;
     @NotBlank
     private String cpfCnpj;

@@ -1,7 +1,6 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -12,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.casaDoAmor.CasaDoAmor.dto.LocalDTO;
+import com.casaDoAmor.CasaDoAmor.dtoAtualizar.LocalDTOAtualizar;
+import com.casaDoAmor.CasaDoAmor.dtoResposta.LocalDTOResposta;
 import com.casaDoAmor.CasaDoAmor.model.Local;
 import com.casaDoAmor.CasaDoAmor.service.LocalService;
 
@@ -23,28 +23,24 @@ public class LocalController {
     public LocalController(LocalService localService) {
         this.localService = localService;
     }
-    private Local paraModel(LocalDTO dto) {
+    private Local paraModel(LocalDTOAtualizar dto) {
         Local entidade = new Local();
+        entidade.setId(dto.getId());
         entidade.setNome(dto.getNome());
         return entidade;
     }
-    private LocalDTO paraDTO(Local entidade) {
-        LocalDTO dto = new LocalDTO();
-        dto.setNome(entidade.getNome());
-        dto.setId(entidade.getId());
-        return dto;
-    }
     @PostMapping
-    public ResponseEntity<UUID> salvar(@RequestBody LocalDTO dto) {
+    public ResponseEntity<LocalDTOResposta> salvar(@RequestBody LocalDTOAtualizar dto) {
         Local entidadeParaSerSalva = paraModel(dto); 
         Local entidadeSalva = localService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
+        LocalDTOResposta responseDTO = LocalDTOResposta.fromEntity(entidadeSalva); 
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
     @GetMapping
-    public ResponseEntity<List<LocalDTO>> listar() {
+    public ResponseEntity<List<LocalDTOResposta>> listar() {
         List<Local> entidades = localService.listarTodos();
-        List<LocalDTO> locais = entidades.stream()
-            .map(this::paraDTO)
+        List<LocalDTOResposta> locais = entidades.stream()
+            .map(LocalDTOResposta::fromEntity)
             .collect(Collectors.toList());
         return ResponseEntity.ok(locais);
     }
