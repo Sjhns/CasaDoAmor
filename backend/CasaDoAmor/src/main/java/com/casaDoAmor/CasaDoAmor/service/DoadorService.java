@@ -6,8 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.casaDoAmor.CasaDoAmor.model.Doador;
 import com.casaDoAmor.CasaDoAmor.repository.DoadorRepository;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DoadorService {
