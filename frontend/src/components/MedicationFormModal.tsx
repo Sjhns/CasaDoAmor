@@ -5,7 +5,7 @@ import axios from "axios";
 import {
   formSchema,
   type FormData,
-} from "../schemas/MedicationFormModal.schema";
+} from "../schemas/MedicationFormModal.schema"; //
 import { useQueryClient } from "@tanstack/react-query";
 import { API_URL } from "../constants";
 import { useState } from "react";
@@ -25,7 +25,7 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema), //
     defaultValues: medicationData ? medicationData : {},
   });
 
@@ -34,7 +34,7 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleErrorModalClose = () => {
-    setIsErrorModalOpen(false); // Apenas fecha o modal de erro
+    setIsErrorModalOpen(false); 
     setErrorMessage("");
   };
   // -------------------------------------------------------------
@@ -55,7 +55,7 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
       await queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
       onClose(); // Sucesso: fecha o modal do formulário
     } catch (error) {
-      let friendlyMessage = "Erro inesperado. Tente novamente."; // Mensagem padrão
+      let friendlyMessage = "Erro inesperado. Tente novamente."; 
 
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
@@ -71,21 +71,17 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
       } else {
         console.error("Erro do servidor: ", error);
         if (error instanceof Error) {
-            friendlyMessage = error.message; // Mensagem de um erro JS genérico
+            friendlyMessage = error.message; 
         }
       }
-
-      // Em vez de 'alert()', nós atualizamos o estado
+      
       setErrorMessage(friendlyMessage);
       setIsErrorModalOpen(true);
-      // Note que NÃO chamamos o 'onClose()' aqui, pois queremos
-      // que o modal de formulário continue aberto para o usuário corrigir.
       // -----------------------------------------------------------
     }
   };
 
 return (
-    // --- MUDANÇA 4: Envolver em um Fragment e renderizar o ErrorModal ---
     <>
         <div
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
@@ -102,20 +98,22 @@ return (
                     </h2>
                 </div>
 
-                {/* Form Content */}
+                {/* Form Content (COM OS CAMPOS ATUALIZADOS) */}
                 <div className="overflow-y-auto flex-1 px-6 py-4">
+                    {/* */}
                     <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)} id="medication-form">
-                        {/* ... (Todo o seu formulário continua aqui, intacto) ... */}
+
+                        {/* Nome */}
                         <div className="flex flex-col gap-1.5">
                             <label htmlFor="nome" className="font-medium text-sm text-gray-700">
-                                Nome da Caixa <span className="text-red-500">*</span>
+                                Nome
                             </label>
                             <input
                                 id="nome"
                                 type="text"
                                 className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                placeholder="Digite o nome da caixa"
-                                {...register("nome")}
+                                placeholder="Digite o nome"
+                                {...register("nome")} /* */
                             />
                             {errors.nome && (
                                 <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
@@ -124,16 +122,17 @@ return (
                             )}
                         </div>
 
+                        {/* Nome Genérico */}
                         <div className="flex flex-col gap-1.5">
                             <label htmlFor="nomeGenerico" className="font-medium text-sm text-gray-700">
-                                Nome Genérico <span className="text-red-500">*</span>
+                                Nome Genérico
                             </label>
                             <input
                                 id="nomeGenerico"
                                 type="text"
                                 className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="Digite o nome genérico"
-                                {...register("nomeGenerico")}
+                                {...register("nomeGenerico")} /* */
                             />
                             {errors.nomeGenerico && (
                                 <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
@@ -141,91 +140,149 @@ return (
                                 </p>
                             )}
                         </div>
-
+                        
+                        {/* Forma Farmacêutica */}
                         <div className="flex flex-col gap-1.5">
-                            <label htmlFor="apelido" className="font-medium text-sm text-gray-700">
-                                Apelido
+                            <label htmlFor="formaFarmaceutica" className="font-medium text-sm text-gray-700">
+                                Forma Farmacêutica
                             </label>
                             <input
-                                id="apelido"
+                                id="formaFarmaceutica"
                                 type="text"
                                 className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                placeholder="Digite um apelido (opcional)"
-                                {...register("apelido")}
+                                placeholder="Ex: Comprimido, Xarope, Injetável..."
+                                {...register("formaFarmaceutica")} /* */
                             />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                            <label htmlFor="codigo" className="font-medium text-sm text-gray-700">
-                                Código <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                id="codigo"
-                                type="text"
-                                className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                placeholder="Digite o código"
-                                {...register("codigo")}
-                            />
-                            {errors.codigo && (
+                            {errors.formaFarmaceutica && (
                                 <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
-                                    <span>⚠</span> {errors.codigo.message}
+                                    <span>⚠</span> {errors.formaFarmaceutica.message}
                                 </p>
                             )}
                         </div>
 
+                        {/* Linha: Categoria / Laboratório */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1.5">
-                                <label htmlFor="validade" className="font-medium text-sm text-gray-700">
-                                    Validade <span className="text-red-500">*</span>
+                                <label htmlFor="categoria" className="font-medium text-sm text-gray-700">
+                                    Categoria
                                 </label>
                                 <input
-                                    id="validade"
-                                    type="date"
+                                    id="categoria"
+                                    type="text"
                                     className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    {...register("validade")}
+                                    placeholder="Ex: Analgésico"
+                                    {...register("categoria")} /* */
                                 />
-                                {errors.validade && (
+                                {errors.categoria && (
                                     <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
-                                        <span>⚠</span> {errors.validade.message}
+                                        <span>⚠</span> {errors.categoria.message}
                                     </p>
                                 )}
                             </div>
 
                             <div className="flex flex-col gap-1.5">
-                                <label htmlFor="lote" className="font-medium text-sm text-gray-700">
-                                    Lote <span className="text-red-500">*</span>
+                                <label htmlFor="laboratorio" className="font-medium text-sm text-gray-700">
+                                    Laboratório
                                 </label>
                                 <input
-                                    id="lote"
+                                    id="laboratorio"
                                     type="text"
                                     className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="Digite o lote"
-                                    {...register("lote")}
+                                    placeholder="Ex: Pfizer, Bayer"
+                                    {...register("laboratorio")} /* */
                                 />
-                                {errors.lote && (
+                                {errors.laboratorio && (
                                     <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
-                                        <span>⚠</span> {errors.lote.message}
+                                        <span>⚠</span> {errors.laboratorio.message}
                                     </p>
                                 )}
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-1.5">
-                            <label htmlFor="descricao" className="font-medium text-sm text-gray-700">
-                                Descrição
-                            </label>
-                            <textarea
-                                id="descricao"
-                                className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                                placeholder="Digite uma descrição (opcional)"
-                                {...register("descricao")}
-                                rows={4}
-                            />
+                        {/* Linha: Via de Administração / Concentração */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="viaAdministracao" className="font-medium text-sm text-gray-700">
+                                    Via de Administração
+                                </label>
+                                <input
+                                    id="viaAdministracao"
+                                    type="text"
+                                    className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    placeholder="Ex: Oral, Intravenosa"
+                                    {...register("viaAdministracao")} /* */
+                                />
+                                {errors.viaAdministracao && (
+                                    <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
+                                        <span>⚠</span> {errors.viaAdministracao.message}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="concentracao" className="font-medium text-sm text-gray-700">
+                                    Concentração
+                                </label>
+                                <input
+                                    id="concentracao"
+                                    type="text"
+                                    className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    placeholder="Ex: 500mg, 10mg/mL"
+                                    {...register("concentracao")} /* */
+                                />
+                                {errors.concentracao && (
+                                    <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
+                                        <span>⚠</span> {errors.concentracao.message}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Linha: Quantidade Mínima / Quantidade Máxima */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="quantidadeMinima" className="font-medium text-sm text-gray-700">
+                                    Quantidade mínima
+                                </label>
+                                <input
+                                    id="quantidadeMinima"
+                                    type="number"
+                                    min="0"
+                                    className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    placeholder="0"
+                                    {...register("quantidadeMinima")} /* */
+                                />
+                                {errors.quantidadeMinima && (
+                                    <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
+                                        <span>⚠</span> {errors.quantidadeMinima.message}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="quantidadeMaxima" className="font-medium text-sm text-gray-700">
+                                    Quantidade Máxima
+                                </label>
+                                <input
+                                    id="quantidadeMaxima"
+                                    type="number"
+                                    min="0"
+                                    className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    placeholder="100"
+                                    /* */
+                                    {...register("quantidadeMaxima")} /* <-- ATENÇÃO AO ACENTO */
+                                />
+                                {errors.quantidadeMaxima && ( /* */
+                                    <p className="text-red-500 text-xs mt-0.5 flex items-center gap-1">
+                                        <span>⚠</span> {errors.quantidadeMaxima.message}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </form>
                 </div>
 
-                {/* Footer */}
+                {/* Footer (Botões) */}
                 <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3 bg-gray-50">
                     <button
                         type="button"
