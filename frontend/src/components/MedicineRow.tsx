@@ -1,10 +1,5 @@
 import { Pencil, AlertTriangle, X, CheckCircle } from "lucide-react";
-import {
-    Typography,
-    IconButton,
-    Tooltip,
-    Chip,
-} from "@material-tailwind/react";
+// Replaced Material Tailwind components with Tailwind markup
 import { getStatusByDate } from "../utils";
 
 interface MedicineRowProps {
@@ -32,14 +27,11 @@ export const MedicineRow = ({
 
     const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
 
-    let statusColor: "green" | "amber" | "red" = "green";
     let StatusIcon = CheckCircle;
 
     if (status === "atencao") {
-        statusColor = "amber";
         StatusIcon = AlertTriangle;
     } else if (status === "vencido") {
-        statusColor = "red";
         StatusIcon = X;
     }
 
@@ -47,87 +39,63 @@ export const MedicineRow = ({
         <tr className="hover:bg-gray-50 transition-colors">
             <td className={classes}>
                 <div className="flex flex-col">
-                    {/* @ts-expect-error Material Tailwind types are too strict */}
-                    <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal opacity-70"
-                    >
+                    <span className="text-sm text-gray-600 font-normal opacity-70">
                         #{medicamento.id.substring(0, 6)}
-                    </Typography>
+                    </span>
                 </div>
             </td>
 
             <td className={classes}>
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-bold"
-                >
+                <span className="text-sm text-gray-900 font-bold">
                     {medicamento.nome}
-                </Typography>
+                </span>
             </td>
 
             <td className={classes}>
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                >
+                <span className="text-sm text-gray-600 font-normal">
                     {medicamento.lote}
-                </Typography>
+                </span>
             </td>
 
             <td className={classes}>
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                >
+                <span className="text-sm text-gray-600 font-normal">
                     {medicamento.formaFarmaceutica}
-                </Typography>
+                </span>
             </td>
 
             <td className={classes}>
                 <div className="w-max">
-                    <Chip
-                        variant="ghost"
-                        size="sm"
-                        value={dataValidade}
-                        color={statusColor}
-                        icon={<StatusIcon className="mt-0.5 h-4 w-4" />}
-                    />
+                    <span
+                        className={`inline-flex items-center gap-2 px-2 py-1 rounded text-sm ${
+                            status === "vencido"
+                                ? "bg-red-600 text-white"
+                                : status === "atencao"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-green-50 text-green-700"
+                        }`}
+                    >
+                        <StatusIcon className="mt-0.5 h-4 w-4" />
+                        {dataValidade}
+                    </span>
                 </div>
             </td>
 
-            {}
             <td className={classes}>
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                >
+                <span className="text-sm text-gray-600 font-normal">
                     {medicamento.categoriaTerapeutica}
-                </Typography>
+                </span>
             </td>
 
             {/* Coluna 7: Ações */}
             <td className={classes}>
                 <div className="flex items-center gap-2">
-                    <Tooltip content="Editar Medicamento">
-                        {/* @ts-expect-error Material Tailwind types are too strict */}
-                        <IconButton
-                            variant="text"
-                            color="blue-gray"
-                            onClick={() => onEdit(medicamento.id)}
-                        >
-                            <Pencil className="h-4 w-4" />
-                        </IconButton>
-                    </Tooltip>
+                    <button
+                        title="Editar Medicamento"
+                        onClick={() => onEdit(medicamento.id)}
+                        className="p-2 rounded hover:bg-gray-100 text-gray-700"
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </button>
                 </div>
             </td>
         </tr>

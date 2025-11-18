@@ -5,15 +5,8 @@ import {
     ArrowUpDown,
     AlertCircle,
 } from "lucide-react";
-import {
-    Card,
-    CardHeader,
-    Typography,
-    Button,
-    CardBody,
-    CardFooter,
-} from "@material-tailwind/react";
-import { useMedicamentos } from "../hook/useMedicamentos.mock";
+// Using plain Tailwind instead of @material-tailwind/react
+import { useMedicamentos } from "../hook/useMedicamentos";
 import { MedicineRow } from "./MedicineRow";
 
 interface MedicamentosTableProps {
@@ -45,7 +38,7 @@ const SkeletonRow = () => (
 
 export const MedicamentosTable = ({
     searchTerm = "",
-    itemsPerPage = 6,
+    itemsPerPage = 5,
     onEdit,
 }: MedicamentosTableProps) => {
     // 1. Estado e Hook (Integração)
@@ -78,40 +71,27 @@ export const MedicamentosTable = ({
         }
     };
 
-    // Renderização de Loading com Skeleton
+    // Renderização de Loading com Skeleton (Tailwind)
     if (isLoading) {
         return (
-            // @ts-expect-error Material Tailwind types are too strict
-            <Card className="h-full w-full shadow-sm border border-gray-200 rounded-lg">
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <CardHeader
-                    floated={false}
-                    shadow={false}
-                    className="rounded-none mb-0 pb-2"
-                >
-                    {/* @ts-expect-error Material Tailwind types are too strict */}
-                    <Typography variant="h5" color="blue-gray">
+            <div className="h-full w-full shadow-sm border border-gray-200 rounded-lg bg-white">
+                <div className="rounded-none mb-0 pb-2 px-4 py-3">
+                    <h5 className="text-lg font-semibold text-gray-900">
                         Lista de Medicamentos
-                    </Typography>
-                </CardHeader>
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <CardBody className="overflow-scroll px-0 pt-0">
+                    </h5>
+                </div>
+                <div className="overflow-scroll px-0 pt-0">
                     <table className="w-full min-w-max table-auto text-left">
                         <thead>
                             <tr>
                                 {TABLE_HEAD.map((head) => (
                                     <th
                                         key={head.label}
-                                        className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                                        className="border-y border-gray-100 bg-gray-50/50 p-4"
                                     >
-                                        {/* @ts-expect-error Material Tailwind types are too strict */}
-                                        <Typography
-                                            variant="small"
-                                            color="blue-gray"
-                                            className="font-normal opacity-70"
-                                        >
+                                        <span className="text-sm text-gray-600 font-normal opacity-70">
                                             {head.label}
-                                        </Typography>
+                                        </span>
                                     </th>
                                 ))}
                             </tr>
@@ -122,94 +102,72 @@ export const MedicamentosTable = ({
                             ))}
                         </tbody>
                     </table>
-                </CardBody>
-            </Card>
+                </div>
+            </div>
         );
     }
 
-    // Renderização de Erro
+    // Renderização de Erro (Tailwind)
     if (isError) {
         return (
-            // @ts-expect-error Material Tailwind types are too strict
-            <Card className="h-full w-full shadow-sm border border-red-200 rounded-lg bg-red-50">
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <CardBody className="flex items-center justify-center gap-3 py-12">
+            <div className="h-full w-full shadow-sm border border-red-200 rounded-lg bg-red-50">
+                <div className="flex items-center justify-center gap-3 py-12 px-4">
                     <AlertCircle className="h-6 w-6 text-red-500" />
                     <div>
-                        {/* @ts-expect-error Material Tailwind types are too strict */}
-                        <Typography variant="h6" color="red">
+                        <h6 className="text-lg font-semibold text-red-600">
                             Erro ao carregar medicamentos
-                        </Typography>
-                        {/* @ts-expect-error Material Tailwind types are too strict */}
-                        <Typography color="gray" className="text-sm">
+                        </h6>
+                        <p className="text-sm text-gray-600">
                             Tente recarregar a página ou contate o suporte.
-                        </Typography>
+                        </p>
                     </div>
-                </CardBody>
-            </Card>
+                </div>
+            </div>
         );
     }
 
     return (
-        // @ts-expect-error Material Tailwind types are too strict
-        <Card className="h-full w-full shadow-sm border border-gray-200 rounded-lg">
-            {/* @ts-expect-error Material Tailwind types are too strict */}
-            <CardHeader
-                floated={false}
-                shadow={false}
-                className="rounded-none mb-0 pb-2"
-            >
+        <div className="h-full w-full shadow-sm border border-gray-200 rounded-lg bg-white">
+            <div className="rounded-none mb-0 pb-2 px-4 py-3">
                 <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
                     <div>
-                        {/* @ts-expect-error Material Tailwind types are too strict */}
-                        <Typography variant="h5" color="blue-gray">
+                        <h5 className="text-lg font-semibold text-gray-900">
                             Lista de Medicamentos
-                        </Typography>
-                        {/* @ts-expect-error Material Tailwind types are too strict */}
-                        <Typography color="gray" className="mt-1 font-normal">
+                        </h5>
+                        <p className="mt-1 text-sm text-gray-500">
                             {totalItems > 0
                                 ? `Visualizando ${itemStart}-${itemEnd} de ${totalItems} medicamentos`
                                 : "Nenhum medicamento encontrado"}
-                        </Typography>
+                        </p>
                     </div>
                 </div>
-            </CardHeader>
+            </div>
 
-            {/* @ts-expect-error Material Tailwind types are too strict */}
-            <CardBody className="overflow-x-auto px-0 pt-0">
+            <div className="overflow-x-auto px-0 pt-0">
                 <table className="w-full min-w-max table-auto text-left">
-                    {/* 3. Thead com colunas */}
                     <thead>
                         <tr>
                             {TABLE_HEAD.map((head) => (
                                 <th
                                     key={head.label}
-                                    className={`cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors ${
-                                        head.sortable
-                                            ? "hover:bg-blue-gray-100"
-                                            : ""
+                                    className={`cursor-pointer border-y border-gray-100 bg-gray-50/50 p-4 transition-colors ${
+                                        head.sortable ? "hover:bg-gray-100" : ""
                                     }`}
                                     onClick={
                                         head.sortable ? toggleSort : undefined
                                     }
                                 >
-                                    {/* @ts-expect-error Material Tailwind types are too strict */}
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="flex items-center justify-between gap-2 font-semibold leading-none opacity-70"
-                                    >
+                                    <span className="flex items-center justify-between gap-2 font-semibold leading-none text-sm text-gray-600 opacity-70">
                                         {head.label}
                                         {head.sortable && (
                                             <ArrowUpDown className="h-4 w-4" />
                                         )}
-                                    </Typography>
+                                    </span>
                                 </th>
                             ))}
                         </tr>
                     </thead>
 
-                    {/* 4. Tbody com MedicineRow */}
                     <tbody>
                         {medicamentos.length > 0 ? (
                             medicamentos.map(
@@ -233,56 +191,40 @@ export const MedicamentosTable = ({
                                     colSpan={TABLE_HEAD.length}
                                     className="p-8 text-center"
                                 >
-                                    {/* @ts-expect-error Material Tailwind types are too strict */}
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                    >
+                                    <span className="text-sm text-gray-600">
                                         Nenhum medicamento encontrado.
-                                    </Typography>
+                                    </span>
                                 </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
-            </CardBody>
+            </div>
 
             {/* Paginação no Footer */}
-            {/* @ts-expect-error Material Tailwind types are too strict */}
-            <CardFooter className="flex flex-col gap-4 items-center justify-between border-t border-blue-gray-50 p-4 md:flex-row">
-                {/* @ts-expect-error Material Tailwind types are too strict */}
-                <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                >
+            <div className="flex flex-col gap-4 items-center justify-between border-t border-gray-100 p-4 md:flex-row">
+                <span className="text-sm text-gray-600 font-normal">
                     Página {page} de {totalPages}
-                </Typography>
+                </span>
                 <div className="flex gap-2">
-                    {/* @ts-expect-error Material Tailwind types are too strict */}
-                    <Button
-                        variant="outlined"
-                        size="sm"
+                    <button
                         onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                         disabled={page === 1}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 px-3 py-1.5 border rounded text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                     >
                         <ChevronLeft className="h-4 w-4" /> Anterior
-                    </Button>
-                    {/* @ts-expect-error Material Tailwind types are too strict */}
-                    <Button
-                        variant="outlined"
-                        size="sm"
+                    </button>
+                    <button
                         onClick={() =>
                             setPage((prev) => Math.min(prev + 1, totalPages))
                         }
                         disabled={page === totalPages}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 px-3 py-1.5 border rounded text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                     >
                         Próxima <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    </button>
                 </div>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 };

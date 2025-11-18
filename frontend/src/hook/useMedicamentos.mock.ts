@@ -18,7 +18,7 @@ const mockData = {
             lote: "LOTE-456",
             formaFarmaceutica: "Gotas",
             categoriaTerapeutica: "Analgésico",
-            validade: "2024-11-20T00:00:00", // Data próxima para testar o 'atencao'
+            validade: "2025-11-20T00:00:00", // Data próxima para testar o 'atencao'
         },
         {
             id: "7g8h9i",
@@ -28,10 +28,18 @@ const mockData = {
             categoriaTerapeutica: "Antibiótico",
             validade: "2023-01-10T00:00:00", // Data vencida para testar o 'vencido'
         },
+        {
+            id: "1a2b3c",
+            nome: "Paracetamol 500mg",
+            lote: "LOTE-123",
+            formaFarmaceutica: "Comprimido",
+            categoriaTerapeutica: "Analgésico",
+            validade: "2025-12-31T00:00:00",
+        },
     ],
     totalPages: 2,
-    totalElements: 6,
-    size: 3,
+    totalElements: 4,
+    size: 2,
     number: 0,
 };
 
