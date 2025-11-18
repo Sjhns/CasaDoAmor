@@ -34,7 +34,7 @@ const mockData = {
             lote: "LOTE-123",
             formaFarmaceutica: "Comprimido",
             categoriaTerapeutica: "Analgésico",
-            validade: "2025-12-31T00:00:00",
+            validade: "2025-02-31T00:00:00",
         },
     ],
     totalPages: 2,
