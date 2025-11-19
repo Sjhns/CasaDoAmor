@@ -1,4 +1,10 @@
-import { Pencil, AlertTriangle, X, CheckCircle } from "lucide-react";
+import {
+    Pencil,
+    AlertTriangle,
+    X,
+    CheckCircle,
+    ArrowRight,
+} from "lucide-react";
 // Replaced Material Tailwind components with Tailwind markup
 import { getStatusByDate } from "../utils";
 
@@ -12,12 +18,14 @@ interface MedicineRowProps {
         validade: string;
     };
     onEdit: (id: string) => void;
+    onDispatch?: (id: string) => void;
     isLast: boolean;
 }
 
 export const MedicineRow = ({
     medicamento,
     onEdit,
+    onDispatch,
     isLast,
 }: MedicineRowProps) => {
     const status = getStatusByDate(medicamento.validade);
@@ -99,9 +107,22 @@ export const MedicineRow = ({
                 </span>
             </td>
 
-            {/* Coluna 7: Ações */}
+            {/* Coluna Despacho */}
             <td className={classes}>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center">
+                    <button
+                        title="Despachar (saída de estoque)"
+                        onClick={() => onDispatch && onDispatch(medicamento.id)}
+                        className={`p-2 rounded hover:bg-gray-100 ${expired ? "text-red-700" : "text-gray-700"}`}
+                    >
+                        <ArrowRight className="h-4 w-4" />
+                    </button>
+                </div>
+            </td>
+
+            {/* Coluna Edição */}
+            <td className={classes}>
+                <div className="flex items-center justify-center">
                     <button
                         title="Editar Medicamento"
                         onClick={() => onEdit(medicamento.id)}

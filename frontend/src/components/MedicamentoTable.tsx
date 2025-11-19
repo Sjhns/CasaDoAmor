@@ -6,7 +6,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 // Using plain Tailwind instead of @material-tailwind/react
-import { useMedicamentos } from "../hook/useMedicamentos";
+import { useMedicamentos } from "../hook/useMedicamentos.mock";
 import { MedicineRow } from "./MedicineRow";
 
 interface MedicamentosTableProps {
@@ -22,7 +22,8 @@ const TABLE_HEAD = [
     { label: "Tipo", sortable: false },
     { label: "Vencimento", sortable: false },
     { label: "Propósito", sortable: false },
-    { label: "Ações", sortable: false },
+    { label: "Despacho", sortable: false, align: "center" },
+    { label: "Edição", sortable: false, align: "center" },
 ];
 
 // Componente de Skeleton para Loading
@@ -63,6 +64,12 @@ export const MedicamentosTable = ({
         setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
     };
 
+    const handleDispatch = (id: string) => {
+        // placeholder: abrir modal de saída / despacho ou navegar
+        console.log("Despachar medicamento:", id);
+        // TODO: integrar com fluxo real de movimentação de estoque
+    };
+
     const handleEdit = (id: string) => {
         if (onEdit) {
             onEdit(id);
@@ -81,13 +88,13 @@ export const MedicamentosTable = ({
                     </h5>
                 </div>
                 <div className="overflow-scroll px-0 pt-0">
-                    <table className="w-full min-w-max table-auto text-left">
+                    <table className="w-full min-w-max table-auto text-left border-collapse">
                         <thead>
                             <tr>
                                 {TABLE_HEAD.map((head) => (
                                     <th
                                         key={head.label}
-                                        className="border-y border-gray-100 bg-gray-50/50 p-4"
+                                        className="border-b border-gray-100 bg-gray-100 p-4 first:rounded-tl-lg last:rounded-tr-lg"
                                     >
                                         <span className="text-sm text-gray-600 font-normal opacity-70">
                                             {head.label}
@@ -127,7 +134,7 @@ export const MedicamentosTable = ({
     }
 
     return (
-        <div className="h-full w-full shadow-sm border border-gray-200 rounded-lg bg-white">
+        <div className="h-full w-full shadow-sm border border-gray-200 rounded-lg bg-white overflow-hidden">
             <div className="rounded-none mb-0 pb-2 px-4 py-3">
                 <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
                     <div>
@@ -144,20 +151,22 @@ export const MedicamentosTable = ({
             </div>
 
             <div className="overflow-x-auto px-0 pt-0">
-                <table className="w-full min-w-max table-auto text-left">
+                <table className="w-full min-w-max table-auto text-left border-collapse">
                     <thead>
                         <tr>
                             {TABLE_HEAD.map((head) => (
                                 <th
                                     key={head.label}
-                                    className={`cursor-pointer border-y border-gray-100 bg-gray-50/50 p-4 transition-colors ${
+                                    className={`cursor-pointer border-b border-gray-100 bg-gray-100 p-4 transition-colors first:rounded-tl-lg last:rounded-tr-lg ${
                                         head.sortable ? "hover:bg-gray-100" : ""
                                     }`}
                                     onClick={
                                         head.sortable ? toggleSort : undefined
                                     }
                                 >
-                                    <span className="flex items-center justify-between gap-2 font-semibold leading-none text-sm text-gray-600 opacity-70">
+                                    <span
+                                        className={`flex items-center ${head.align === "center" ? "justify-center" : "justify-between"} gap-2 font-semibold leading-none text-sm text-gray-600 opacity-70`}
+                                    >
                                         {head.label}
                                         {head.sortable && (
                                             <ArrowUpDown className="h-4 w-4" />
@@ -179,6 +188,7 @@ export const MedicamentosTable = ({
                                         key={med.id}
                                         medicamento={med}
                                         onEdit={handleEdit}
+                                        onDispatch={handleDispatch}
                                         isLast={
                                             index === medicamentos.length - 1
                                         }

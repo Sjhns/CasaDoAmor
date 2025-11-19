@@ -220,6 +220,7 @@ export const Dashboard = () => {
 
                         {/* Tabela */}
                         <div className="overflow-x-auto">
+                            <MedicamentosTable />
                             {/* <table className="w-full rounded-2xl overflow-hidden">
 
                 
@@ -312,7 +313,6 @@ export const Dashboard = () => {
                   ))}
                 </tbody>
               </table> */}
-                            <MedicamentosTable />
                         </div>
 
                         <div className="mt-8">
