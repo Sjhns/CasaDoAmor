@@ -134,7 +134,7 @@ export const MedicamentosTable = ({
     }
 
     return (
-        <div className="h-full w-full rounded-lg bg-white overflow-hidden">
+        <div className="h-full w-full rounded-lg bg-white overflow-x-auto overflow-hidden">
             <div className="rounded-none mb-0 pb-2 px-4 py-3">
                 <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
                     <div>
@@ -150,8 +150,8 @@ export const MedicamentosTable = ({
                 </div>
             </div>
 
-            <div className="overflow-x-auto px-0 pt-0 rounded-2xl">
-                <table className="w-full min-w-max table-auto text-left">
+            <div className="px-0 pt-0 rounded-2xl">
+                <table className="w-full min-w-[700px] table-auto text-left">
                     <thead>
                         <tr>
                             {TABLE_HEAD.map((head) => (
