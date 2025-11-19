@@ -81,7 +81,7 @@ export const MedicamentosTable = ({
     // Renderização de Loading com Skeleton (Tailwind)
     if (isLoading) {
         return (
-            <div className="h-full w-full shadow-sm border border-gray-200 rounded-lg bg-white">
+            <div className="h-full w-full shadow-sm  rounded-lg bg-white">
                 <div className="rounded-none mb-0 pb-2 px-4 py-3">
                     <h5 className="text-lg font-semibold text-gray-900">
                         Lista de Medicamentos
@@ -134,7 +134,7 @@ export const MedicamentosTable = ({
     }
 
     return (
-        <div className="h-full w-full shadow-sm border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="h-full w-full rounded-lg bg-white overflow-hidden">
             <div className="rounded-none mb-0 pb-2 px-4 py-3">
                 <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
                     <div>
@@ -150,8 +150,8 @@ export const MedicamentosTable = ({
                 </div>
             </div>
 
-            <div className="overflow-x-auto px-0 pt-0">
-                <table className="w-full min-w-max table-auto text-left border-collapse">
+            <div className="overflow-x-auto px-0 pt-0 rounded-2xl">
+                <table className="w-full min-w-max table-auto text-left">
                     <thead>
                         <tr>
                             {TABLE_HEAD.map((head) => (
@@ -185,13 +185,14 @@ export const MedicamentosTable = ({
                                     index: number
                                 ) => (
                                     <MedicineRow
-                                        key={med.id}
+                                        key={`${med.id}-${index}`}
                                         medicamento={med}
                                         onEdit={handleEdit}
                                         onDispatch={handleDispatch}
                                         isLast={
                                             index === medicamentos.length - 1
                                         }
+                                        lastRowClass="last:rounded-bl-lg last:rounded-br-lg"
                                     />
                                 )
                             )
@@ -212,7 +213,7 @@ export const MedicamentosTable = ({
             </div>
 
             {/* Paginação no Footer */}
-            <div className="flex flex-col gap-4 items-center justify-between border-t border-gray-100 p-4 md:flex-row">
+            <div className="flex flex-col gap-4 items-center justify-between p-4 md:flex-row">
                 <span className="text-sm text-gray-600 font-normal">
                     Página {page} de {totalPages}
                 </span>
