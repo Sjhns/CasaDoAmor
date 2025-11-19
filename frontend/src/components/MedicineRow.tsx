@@ -34,7 +34,9 @@ export const MedicineRow = ({
     );
 
     const tdClass = (extra: string = "") =>
-        isLast ? `p-4 ${extra}` : `p-4 border-b border-blue-gray-50 ${extra}`;
+        isLast
+            ? `p-2 text-xs sm:p-4 sm:text-sm ${extra} min-w-[90px]`
+            : `p-2 text-xs sm:p-4 sm:text-sm border-b border-blue-gray-50 ${extra} min-w-[90px]`;
     const expired = status === "vencido";
 
     let StatusIcon = CheckCircle;
