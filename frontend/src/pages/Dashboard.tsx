@@ -85,10 +85,8 @@ export const Dashboard = () => {
     // Filtrar remédios baseado na busca
     const remediosFiltrados = remedios.filter(
         (remedio) =>
-            remedio.nome
-                .toLowerCase()
-                .includes(tabelaBuscaQuery.toLowerCase()) ||
-            remedio.lote.toLowerCase().includes(tabelaBuscaQuery.toLowerCase())
+            remedio.nome.toLowerCase().includes(tabelaBuscaQuery.toLowerCase())
+        // remedio.lote.toLowerCase().includes(tabelaBuscaQuery.toLowerCase())
     );
 
     const handleOpenCreateModal = () => {
