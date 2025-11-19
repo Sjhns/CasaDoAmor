@@ -27,13 +27,14 @@ export const MedicineRow = ({
     onEdit,
     onDispatch,
     isLast,
-}: MedicineRowProps) => {
+}: MedicineRowProps & { lastRowClass?: string }) => {
     const status = getStatusByDate(medicamento.validade);
     const dataValidade = new Date(medicamento.validade).toLocaleDateString(
         "pt-BR"
     );
 
-    const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+    const tdClass = (extra: string = "") =>
+        isLast ? `p-4 ${extra}` : `p-4 border-b border-blue-gray-50 ${extra}`;
     const expired = status === "vencido";
 
     let StatusIcon = CheckCircle;
@@ -46,9 +47,9 @@ export const MedicineRow = ({
 
     return (
         <tr
-            className={`${expired ? "bg-red-50" : "hover:bg-gray-50"} transition-colors`}
+            className={`${expired ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50"} transition-colors`}
         >
-            <td className={classes}>
+            <td className={tdClass()}>
                 <div className="flex flex-col">
                     <span
                         className={`text-sm font-normal opacity-70 ${expired ? "text-red-700" : "text-gray-600"}`}
@@ -58,7 +59,7 @@ export const MedicineRow = ({
                 </div>
             </td>
 
-            <td className={classes}>
+            <td className={tdClass()}>
                 <span
                     className={`text-sm font-bold ${expired ? "text-red-800" : "text-gray-900"}`}
                 >
@@ -66,7 +67,7 @@ export const MedicineRow = ({
                 </span>
             </td>
 
-            <td className={classes}>
+            <td className={tdClass()}>
                 <span
                     className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}
                 >
@@ -74,7 +75,7 @@ export const MedicineRow = ({
                 </span>
             </td>
 
-            <td className={classes}>
+            <td className={tdClass()}>
                 <span
                     className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}
                 >
@@ -82,7 +83,7 @@ export const MedicineRow = ({
                 </span>
             </td>
 
-            <td className={classes}>
+            <td className={tdClass()}>
                 <div className="w-max">
                     <span
                         className={`inline-flex items-center gap-2 px-2 py-1 rounded text-sm ${
@@ -99,7 +100,7 @@ export const MedicineRow = ({
                 </div>
             </td>
 
-            <td className={classes}>
+            <td className={tdClass()}>
                 <span
                     className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}
                 >
@@ -108,7 +109,7 @@ export const MedicineRow = ({
             </td>
 
             {/* Coluna Despacho */}
-            <td className={classes}>
+            <td className={tdClass()}>
                 <div className="flex items-center justify-center">
                     <button
                         title="Despachar (saída de estoque)"
@@ -121,7 +122,7 @@ export const MedicineRow = ({
             </td>
 
             {/* Coluna Edição */}
-            <td className={classes}>
+            <td className={tdClass()}>
                 <div className="flex items-center justify-center">
                     <button
                         title="Editar Medicamento"
