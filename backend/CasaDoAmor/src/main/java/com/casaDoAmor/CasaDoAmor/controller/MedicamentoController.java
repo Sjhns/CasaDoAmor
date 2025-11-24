@@ -1,9 +1,6 @@
 package com.casaDoAmor.CasaDoAmor.controller;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,14 +8,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.casaDoAmor.CasaDoAmor.dtoAtualizar.MovimentarEstoqueDTOAtualizar;
 import com.casaDoAmor.CasaDoAmor.dtoCriar.MedicamentoDTOCriar;
-import com.casaDoAmor.CasaDoAmor.dtoListar.MedicamentoDTOListar;
+import com.casaDoAmor.CasaDoAmor.dtoListar.MedicamentoEstoqueDTOListar;
 import com.casaDoAmor.CasaDoAmor.dtoResposta.EstoqueDTOResposta;
 import com.casaDoAmor.CasaDoAmor.dtoResposta.MedicamentoDTOResposta;
 import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import com.casaDoAmor.CasaDoAmor.model.Medicamento;
+import com.casaDoAmor.CasaDoAmor.paginacao.PageResposta;
 import com.casaDoAmor.CasaDoAmor.service.MedicamentoService;
 
 import jakarta.validation.Valid;
@@ -47,11 +46,7 @@ public class MedicamentoController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
     @GetMapping
-    public ResponseEntity<List<MedicamentoDTOListar>> listar() {
-        List<Medicamento> entidades = medicamentoService.listarTodos();
-        List<MedicamentoDTOListar> dtosListar = entidades.stream()
-            .map(MedicamentoDTOListar::fromEntity)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(dtosListar);
+    public PageResposta<MedicamentoEstoqueDTOListar> listarPaginado( @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int per_page, @RequestParam(required = false) String search, @RequestParam(defaultValue = "nome") String sort_by, @RequestParam(defaultValue = "asc") String sort_dir) {
+        return medicamentoService.listarPaginado(page, per_page, search, sort_by, sort_dir);
     }
 }

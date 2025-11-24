@@ -2,26 +2,59 @@ package com.casaDoAmor.CasaDoAmor.service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors; // Import necessário para o stream
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.casaDoAmor.CasaDoAmor.dtoAtualizar.MovimentarEstoqueDTOAtualizar;
 import com.casaDoAmor.CasaDoAmor.dtoCriar.MedicamentoDTOCriar;
+import com.casaDoAmor.CasaDoAmor.dtoListar.MedicamentoEstoqueDTOListar; 
 import com.casaDoAmor.CasaDoAmor.model.DenominacaoGenerica;
 import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import com.casaDoAmor.CasaDoAmor.model.Medicamento;
+import com.casaDoAmor.CasaDoAmor.paginacao.PageResposta;
 import com.casaDoAmor.CasaDoAmor.repository.EstoqueRepository;
 import com.casaDoAmor.CasaDoAmor.repository.MedicamentoRepository;
+import com.casaDoAmor.CasaDoAmor.specification.MedicamentoSpecification; 
 
 @Service
 public class MedicamentoService {
-    private final MedicamentoRepository medicamentoRepository;    
+    private final MedicamentoRepository medicamentoRepository; 	
     private final EstoqueRepository estoqueRepository;
     private final DenominacaoGenericaService denominacaoGenericaService;
+
     public MedicamentoService(MedicamentoRepository medicamentoRepository, EstoqueRepository estoqueRepository,
             DenominacaoGenericaService denominacaoGenericaService) {
         this.medicamentoRepository = medicamentoRepository;
         this.estoqueRepository = estoqueRepository;
         this.denominacaoGenericaService = denominacaoGenericaService;
+    }
+    @Transactional(readOnly = true)
+    public PageResposta<MedicamentoEstoqueDTOListar> listarPaginado(
+        int page, 
+        int perPage, 
+        String search, 
+        String sortBy, 
+        String sortDir) {
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page - 1, perPage, sort);
+        Specification<Medicamento> spec = MedicamentoSpecification.buscarPorTermo(search);
+        Page<Medicamento> pageEntidades = medicamentoRepository.findAll(spec, pageable);
+        List<MedicamentoEstoqueDTOListar> dtos = pageEntidades.getContent().stream()
+            .map(MedicamentoEstoqueDTOListar::fromEntity)
+            .collect(Collectors.toList());
+        PageResposta<MedicamentoEstoqueDTOListar> response = new PageResposta<>(
+            pageEntidades.getTotalElements(), 
+            pageEntidades.getNumber() + 1,    
+            pageEntidades.getSize(),          
+            dtos                             
+        );
+        return response;
     }
     @Transactional
     public Medicamento salvar(MedicamentoDTOCriar dto) { 
@@ -56,13 +89,14 @@ public class MedicamentoService {
         long estoqueMinimo = medicamento.getEstoqueMinimo();
         long estoqueMaximo = medicamento.getEstoqueMaximo();
         long quantidadeMovimentada = dto.getQuantidade();
+        
         if (quantidadeMovimentada <= 0) {
             throw new RuntimeException("ERRO 400: A quantidade a ser movimentada deve ser maior que zero.");
         }
         long quantidadeAtualUnidadeEstoque = unidadeEstoque.getQuantidade();
         long saldoAtualTotal = medicamento.getEstoques().stream()
-                                  .mapToLong(Estoque::getQuantidade)
-                                  .sum();
+                                     .mapToLong(Estoque::getQuantidade)
+                                     .sum();
         long novoSaldoUnidadeEstoque;
         long novoSaldoTotal;
         switch (dto.getTipo().toUpperCase()) {
@@ -77,6 +111,7 @@ public class MedicamentoService {
             case "SAIDA":
                 novoSaldoUnidadeEstoque = quantidadeAtualUnidadeEstoque - quantidadeMovimentada;
                 novoSaldoTotal = saldoAtualTotal - quantidadeMovimentada;
+                
                 if (novoSaldoUnidadeEstoque < 0) {
                     throw new RuntimeException("SAÍDA INVÁLIDA: Quantidade insuficiente no Lote.");
                 }
