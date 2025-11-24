@@ -1,4 +1,6 @@
 package com.casaDoAmor.CasaDoAmor.model;
+
+import com.casaDoAmor.CasaDoAmor.model.Medicamento;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +17,7 @@ public class Estoque {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     private Long quantidade;
     private String status;
     private String lote;
