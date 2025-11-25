@@ -13,13 +13,7 @@ import java.util.UUID;
 public interface EstoqueRepository extends JpaRepository<Estoque, UUID> {
 
     List<Estoque> findByQuantidade(long quantidade);
-    List<Estoque> findByEstoqueMaximo(long estoqueMaximo);
-    List<Estoque> findByEstoqueMinimo(long estoqueMinimo);
     List<Estoque> findByStatus(String status);
-    List<Estoque> findByLote(String lote);
-    List<Estoque> findByValidadeApos(LocalDate validadeAposAberto);
+    List<Estoque> findByLote(String lote);  
     List<Estoque> findByMedicamentoId(UUID medicamentoId);
-
-    @Query("SELECT e FROM Estoque e WHERE e.quantidade <= e.estoqueMinimo")
-    List<Estoque> findByEstoqueBaixo();
 }
