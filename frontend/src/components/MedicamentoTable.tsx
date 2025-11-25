@@ -6,7 +6,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 // Using plain Tailwind instead of @material-tailwind/react
-import { useMedicamentos } from "../hook/useMedicamentos.mock";
+import { useMedicamentos } from "../hook/useMedicamentos";
 import { MedicineRow } from "./MedicineRow";
 
 interface MedicamentosTableProps {
@@ -54,9 +54,11 @@ export const MedicamentosTable = ({
         sort_dir: sortDir,
     });
 
-    const medicamentos = data?.content || [];
-    const totalPages = data?.totalPages || 1;
-    const totalItems = data?.totalElements || 0;
+    const medicamentos = data?.itens || [];
+     const totalPaginas = data ? Math.ceil(data.totalRegistrosEncontrados / data.quantidadeItensSolicitados) : 1;
+
+
+    const totalItems = data?.totalRegistrosEncontrados || 0;
     const itemStart = (page - 1) * itemsPerPage + 1;
     const itemEnd = Math.min(page * itemsPerPage, totalItems);
 
@@ -185,7 +187,7 @@ export const MedicamentosTable = ({
                                     index: number
                                 ) => (
                                     <MedicineRow
-                                        key={`${med.id}-${index}`}
+                                        key={`${med.idMedicamento}-${index}`}
                                         medicamento={med}
                                         onEdit={handleEdit}
                                         onDispatch={handleDispatch}
@@ -215,7 +217,7 @@ export const MedicamentosTable = ({
             {/* Paginação no Footer */}
             <div className="flex flex-col gap-4 items-center justify-between p-4 md:flex-row">
                 <span className="text-sm text-gray-600 font-normal">
-                    Página {page} de {totalPages}
+                    Página {page} de {totalPaginas}
                 </span>
                 <div className="flex gap-2">
                     <button
@@ -227,9 +229,9 @@ export const MedicamentosTable = ({
                     </button>
                     <button
                         onClick={() =>
-                            setPage((prev) => Math.min(prev + 1, totalPages))
+                            setPage((prev) => Math.min(prev + 1, totalPaginas))
                         }
-                        disabled={page === totalPages}
+                        disabled={page === totalPaginas}
                         className="flex items-center gap-1 px-3 py-1.5 border rounded text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                     >
                         Próxima <ChevronRight className="h-4 w-4" />
