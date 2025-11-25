@@ -5,7 +5,6 @@ import {
     ArrowUpDown,
     AlertCircle,
 } from "lucide-react";
-// Using plain Tailwind instead of @material-tailwind/react
 import { useMedicamentos } from "../hook/useMedicamentos";
 import { MedicineRow } from "./MedicineRow";
 
