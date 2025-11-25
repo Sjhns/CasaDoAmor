@@ -30,41 +30,8 @@ public class NotificacaoService {
         this.estoqueRepo = estoqueRepo;
     }
 
-    public void verificarMedicamentosCriticos() {
-        LocalDate dataLimiteVencimento = LocalDate.now().plusDays(30);
-        List<Medicamento> vencimentosProximos = medicamentoRepo.buscarPorVencimentoAntesDe(dataLimiteVencimento);
-
-        for (Medicamento med : vencimentosProximos) {
-            Notificacao notificacao = new Notificacao();
-            notificacao.setTipoAlerta("VENCIMENTO_PROXIMO");
-            notificacao.setMensagem("Medicamento " + med.getNome() + " vence em " + med.getValidade());
-            notificacao.setDataCriacao(LocalDateTime.now());
-            notificacaoRepo.save(notificacao);
-
-            String emailAdmin = "admin@casadoamor.com"; 
-            String assunto = "[ALERTA] Vencimento Próximo: " + med.getNome();
-            emailService.enviarEmail(emailAdmin, assunto, notificacao.getMensagem());
-        }
-        List<Estoque> estoqueBaixo = estoqueRepo.findByEstoqueBaixo();
-
-        for (Estoque estoque : estoqueBaixo) {
-            String nomeMedicamento = estoque.getMedicamento().getNome();
-            Long qtdAtual = estoque.getQuantidade();
-
-            Notificacao notificacao = new Notificacao();
-            notificacao.setTipoAlerta("ESTOQUE_BAIXO");
-            notificacao.setMensagem("Medicamento " + nomeMedicamento + " está com estoque baixo (" + qtdAtual + " un.)");
-            notificacao.setDataCriacao(LocalDateTime.now());
-            notificacaoRepo.save(notificacao);
-
-            String emailAdmin = "admin@casadoamor.com";
-            String assunto = "[ALERTA] Estoque Baixo: " + nomeMedicamento;
-            emailService.enviarEmail(emailAdmin, assunto, notificacao.getMensagem());
-        }
-    }
-
     @Scheduled(cron = "0 0 7 * * ?")
     public void executarVerificacaoAgendada() {
-        verificarMedicamentosCriticos();
+        // verificarMedicamentosCriticos();
     }
 }
