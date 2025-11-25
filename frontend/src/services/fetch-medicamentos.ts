@@ -31,7 +31,7 @@ export interface PaginatedMedicamentosResponse {
   totalRegistrosEncontrados: number;
 }
 
-// funcao aceitando os parametros
+
 export const fetchMedicamentos = async ({
   page,
   per_page,
@@ -60,32 +60,6 @@ export const fetchMedicamentos = async ({
 
   if (response.ok) {
     return response.json();
-  }
-
-  // Se o endpoint paginado não existir (404), tentar buscar no endpoint sem paginação
-  if (response.status === 404) {
-    // Alguns backends usam rota singular '/medicamento' para listar todos
-    const fallbackResp = await fetch(`${API_URL}/medicamento`);
-
-    if (!fallbackResp.ok) {
-      throw new Error(
-        `Erro na Busca do Remedio (fallback): ${fallbackResp.status}`
-      );
-    }
-
-    const all: MedicamentoResponse[] = await fallbackResp.json();
-
-    // Adaptar para o formato paginado esperado pelo frontend
-    const startIndex = (page - 1) * per_page;
-    const pageItems = all.slice(startIndex, startIndex + per_page);
-
-    return {
-      content: pageItems,
-      totalPages: Math.max(1, Math.ceil(all.length / per_page)),
-      totalElements: all.length,
-      size: pageItems.length,
-      pageNumber: page - 1,
-    };
   }
 
   throw new Error(`Erro na Busca do Remedio: ${response.status}`);
