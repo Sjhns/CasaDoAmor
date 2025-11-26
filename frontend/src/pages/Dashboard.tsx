@@ -4,6 +4,9 @@ import { useState } from "react";
 import { MedicamentosTable } from "../components/MedicamentoTable";
 import { SearchBar } from "../components/SearchBar";
 import { useDebounce } from "../hook/useDebounce";
+import MedicationFormModal from "../components/MedicationFormModal";
+import { type FormData } from "../schemas/MedicationFormModal.schema"; //
+import ModalCadastroEstoque from "../components/ModalCadastroEstoque";
 
 export const Dashboard = () => {
     const [buscaQuery, setBuscaQuery] = useState("");
@@ -12,22 +15,37 @@ export const Dashboard = () => {
     const [tabelaBusca, setTabelaBusca] = useState("");
     // delay usando debounce
     const debaunceBusca = useDebounce(tabelaBusca, 500); // 500 ms
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCadastrarEstoqueOpen, setIsCadastrarEstoqueOpen] = useState(false);
+    const [editingMed, setEditingMed] = useState<
+        (FormData & { id: number | string }) | undefined
+    >(undefined);
 
     // const [tabelaBuscaQuery, setTabelaBuscaQuery] = useState("");
 
-    // const handleOpenCreateModal = () => {
-    //     setEditingMed(undefined);
-    //     setIsModalOpen(true);
-    // };
+    const handleOpenCreateModal = () => {
+        setEditingMed(undefined);
+        setIsModalOpen(true);
+    };
 
-    // const handleOpenEditModal = (medicamento: MedicamentoComId) => {
-    //     setEditingMed(medicamento);
-    //     setIsModalOpen(true);
-    // };
+    const handleOpenEditModal = (
+        medicamento: FormData & { id: number | string }
+    ) => {
+        setEditingMed(medicamento);
+        setIsModalOpen(true);
+    };
 
-    // const handleCloseModal = () => {
-    //     setIsModalOpen(false);
-    // };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleCloseCadastrarEstoque = () => {
+        setIsCadastrarEstoqueOpen(false);
+    };
+
+    const handleOpenCadastrarEstoque = () => {
+        setIsCadastrarEstoqueOpen(true);
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -110,12 +128,15 @@ export const Dashboard = () => {
                                 <button className="p-2.5 hover:bg-gray-100 rounded-lg transition-colors">
                                     {/* <Filter className="w-6 h-6 text-gray-700" /> */}
                                 </button>
-                                <button className="bg-sky-500 text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-sky-600 transition-colors text-sm md:text-base">
-                                    Cadastrar categoria
+                                <button
+                                    onClick={() => handleOpenCadastrarEstoque()}
+                                    className="bg-sky-500 text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-sky-600 transition-colors text-sm md:text-base"
+                                >
+                                    Cadastrar estoque
                                 </button>
                                 <button
                                     className="bg-black text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm md:text-base"
-                                    //onClick={handleOpenCreateModal}
+                                    onClick={handleOpenCreateModal}
                                 >
                                     Adicionar remédio
                                 </button>
@@ -130,12 +151,19 @@ export const Dashboard = () => {
                 </main>
             </div>
 
-            {/* {isModalOpen && (
+            {isModalOpen && (
                 <MedicationFormModal
                     medicationData={editingMed}
                     onClose={handleCloseModal}
                 />
-            )} */}
+            )}
+
+            {isCadastrarEstoqueOpen && (
+                <ModalCadastroEstoque
+                    onClose={handleCloseCadastrarEstoque}
+                    open={isCadastrarEstoqueOpen}
+                />
+            )}
         </div>
     );
 };
