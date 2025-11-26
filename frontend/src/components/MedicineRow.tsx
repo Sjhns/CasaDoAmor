@@ -21,7 +21,7 @@ export const MedicineRow = ({
     onDispatch,
     isLast,
 }: MedicineRowProps & { lastRowClass?: string }) => {
-    const status = getStatusByDate("");
+    const status = getStatusByDate(medicamento.validade || "");
 
     const tdClass = (extra: string = "") =>
         isLast
