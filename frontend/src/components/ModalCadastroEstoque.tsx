@@ -178,13 +178,13 @@ export default function ModalCadastroEstoque({
 
                     <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
                         <button
-                            className="px-5 py-2.5 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                            className="px-6 py-2.5 rounded-lg font-medium text-sm text-white bg-red-600 border border-white hover:opacity-80"
                             onClick={onClose}
                         >
                             Cancelar
                         </button>
                         <button
-                            className="px-5 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            className="px-6 py-2.5 rounded-lg font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             onClick={handleSubmit}
                         >
                             Cadastrar
