@@ -40,8 +40,6 @@ export const fetchMedicamentos = async ({
 }: FetchMedicamentosParams): Promise<PaginatedMedicamentosResponse> => {
     const params = new URLSearchParams();
 
-    // mapeamento do retorno do hook
-
     params.append("page", page.toString());
     params.append("per_page", per_page.toString());
 
