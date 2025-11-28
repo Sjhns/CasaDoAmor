@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
 
@@ -12,7 +12,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <Navbar />
       <div className="flex bg-gray-50 min-h-screen">
         <Sidebar />
-        <main className="flex-1 p-3">
+        <main className="flex-1">
           {children}
         </main>
       </div>
