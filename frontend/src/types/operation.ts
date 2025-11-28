@@ -1,6 +1,5 @@
-// Esta interface define a "forma" de um item do histórico
 export interface Operation {
-  id: number;
+  id: string;
   type: string;
   name: string;
   date: string;
