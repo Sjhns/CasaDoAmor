@@ -239,7 +239,7 @@ export const MedicamentosTable = ({
                         onClick={() =>
                             setPage((prev) => Math.min(prev + 1, totalPaginas))
                         }
-                        disabled={page === totalPaginas}
+                        disabled={page === totalPaginas || totalPaginas < 2}
                         className="flex items-center gap-1 px-3 py-1.5 border rounded text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                     >
                         Próxima <ChevronRight className="h-4 w-4" />
