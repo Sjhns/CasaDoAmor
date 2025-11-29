@@ -5,18 +5,11 @@ import {
     CheckCircle,
     ArrowRight,
 } from "lucide-react";
-// Replaced Material Tailwind components with Tailwind markup
 import { getStatusByDate } from "../utils";
+import type { MedicamentoResponse } from "../services/fetch-medicamentos";
 
 interface MedicineRowProps {
-    medicamento: {
-        id: string;
-        nome: string;
-        lote: string;
-        formaFarmaceutica: string;
-        categoriaTerapeutica: string;
-        validade: string;
-    };
+    medicamento: MedicamentoResponse;
     onEdit: (id: string) => void;
     onDispatch?: (id: string) => void;
     isLast: boolean;
@@ -28,10 +21,7 @@ export const MedicineRow = ({
     onDispatch,
     isLast,
 }: MedicineRowProps & { lastRowClass?: string }) => {
-    const status = getStatusByDate(medicamento.validade);
-    const dataValidade = new Date(medicamento.validade).toLocaleDateString(
-        "pt-BR"
-    );
+    const status = getStatusByDate(medicamento.validade || "");
 
     const tdClass = (extra: string = "") =>
         isLast
@@ -56,7 +46,7 @@ export const MedicineRow = ({
                     <span
                         className={`text-sm font-normal opacity-70 ${expired ? "text-red-700" : "text-gray-600"}`}
                     >
-                        #{medicamento.id.substring(0, 6)}
+                        #{medicamento.idMedicamento.substring(0, 6)}
                     </span>
                 </div>
             </td>
@@ -65,7 +55,7 @@ export const MedicineRow = ({
                 <span
                     className={`text-sm font-bold ${expired ? "text-red-800" : "text-gray-900"}`}
                 >
-                    {medicamento.nome}
+                    {medicamento.nomeMedicamento}
                 </span>
             </td>
 
@@ -97,7 +87,14 @@ export const MedicineRow = ({
                         }`}
                     >
                         <StatusIcon className="mt-0.5 h-4 w-4" />
-                        {dataValidade}
+                        {new Date(
+                            medicamento.validade || ""
+                        ).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            timeZone: "UTC",
+                        })}
                     </span>
                 </div>
             </td>
@@ -115,7 +112,9 @@ export const MedicineRow = ({
                 <div className="flex items-center justify-center">
                     <button
                         title="Despachar (saída de estoque)"
-                        onClick={() => onDispatch && onDispatch(medicamento.id)}
+                        onClick={() =>
+                            onDispatch && onDispatch(medicamento.idMedicamento)
+                        }
                         className={`p-2 rounded hover:bg-gray-100 ${expired ? "text-red-700" : "text-gray-700"}`}
                     >
                         <ArrowRight className="h-4 w-4" />
@@ -128,7 +127,7 @@ export const MedicineRow = ({
                 <div className="flex items-center justify-center">
                     <button
                         title="Editar Medicamento"
-                        onClick={() => onEdit(medicamento.id)}
+                        onClick={() => onEdit(medicamento.idMedicamento)}
                         className={`p-2 rounded hover:bg-gray-100 ${expired ? "text-red-700" : "text-gray-700"}`}
                     >
                         <Pencil className="h-4 w-4" />

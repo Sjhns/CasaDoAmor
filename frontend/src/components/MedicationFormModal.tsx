@@ -1,4 +1,3 @@
-// 1. O 'import styles' foi removido. Não é mais necessário.
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -10,15 +9,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { API_URL } from "../constants";
 import { useEffect, useState } from "react";
 import ErrorModal from "../components/ErrorModal";
-// -----------------------------------------------------------
 
 interface MedicationFormModalProps {
   medicationData?: FormData & { id: number | string };
   onClose: () => void;
+  onSuccessCreate?: (id: number) => void;
 }
 
 const MedicationFormModal = (props: MedicationFormModalProps) => {
-  const { medicationData, onClose } = props;
+  const { medicationData, onClose, onSuccessCreate } = props;
 
   const {
     register,
@@ -45,11 +44,15 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
         const id = medicationData.id;
         const url = `${API_URL}/medicamento/${id}`;
         const response = await axios.put(url, data);
-        console.log("PUT: ", response.data);
       } else {
         const url = `${API_URL}/medicamento`;
         const response = await axios.post(url, data);
         console.log("POST: ", response.data);
+
+        const createdId = response.data.id;
+        if (onSuccessCreate && createdId) {
+          onSuccessCreate(createdId);
+        }
       }
 
       await queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
@@ -77,7 +80,6 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
 
       setErrorMessage(friendlyMessage);
       setIsErrorModalOpen(true);
-
     }
   };
 

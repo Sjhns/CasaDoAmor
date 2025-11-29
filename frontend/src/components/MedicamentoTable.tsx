@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ChevronLeft,
     ChevronRight,
     ArrowUpDown,
     AlertCircle,
 } from "lucide-react";
-// Using plain Tailwind instead of @material-tailwind/react
-import { useMedicamentos } from "../hook/useMedicamentos.mock";
+import { useMedicamentos } from "../hook/useMedicamentos";
 import { MedicineRow } from "./MedicineRow";
 
 interface MedicamentosTableProps {
@@ -46,6 +45,11 @@ export const MedicamentosTable = ({
     const [page, setPage] = useState(1);
     const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
+    // Resetar página quando a busca mudar (evitar setState no render)
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm]);
+
     const { data, isLoading, isError } = useMedicamentos({
         page: page,
         per_page: itemsPerPage,
@@ -54,9 +58,14 @@ export const MedicamentosTable = ({
         sort_dir: sortDir,
     });
 
-    const medicamentos = data?.content || [];
-    const totalPages = data?.totalPages || 1;
-    const totalItems = data?.totalElements || 0;
+    const medicamentos = data?.itens || [];
+    const totalPaginas = data
+        ? Math.ceil(
+              data.totalRegistrosEncontrados / data.quantidadeItensSolicitados
+          )
+        : 1;
+
+    const totalItems = data?.totalRegistrosEncontrados || 0;
     const itemStart = (page - 1) * itemsPerPage + 1;
     const itemEnd = Math.min(page * itemsPerPage, totalItems);
 
@@ -64,12 +73,12 @@ export const MedicamentosTable = ({
         setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
     };
 
+    // integrar com modal de despacho
     const handleDispatch = (id: string) => {
-        // placeholder: abrir modal de saída / despacho ou navegar
         console.log("Despachar medicamento:", id);
-        // TODO: integrar com fluxo real de movimentação de estoque
     };
 
+    // integrar com modal de edicao
     const handleEdit = (id: string) => {
         if (onEdit) {
             onEdit(id);
@@ -133,6 +142,7 @@ export const MedicamentosTable = ({
         );
     }
 
+    // rederizacao principal
     return (
         <div className="h-full w-full rounded-lg bg-white overflow-x-auto overflow-hidden">
             <div className="rounded-none mb-0 pb-2 px-4 py-3">
@@ -185,7 +195,7 @@ export const MedicamentosTable = ({
                                     index: number
                                 ) => (
                                     <MedicineRow
-                                        key={`${med.id}-${index}`}
+                                        key={`${med.idMedicamento}-${index}`}
                                         medicamento={med}
                                         onEdit={handleEdit}
                                         onDispatch={handleDispatch}
@@ -215,7 +225,7 @@ export const MedicamentosTable = ({
             {/* Paginação no Footer */}
             <div className="flex flex-col gap-4 items-center justify-between p-4 md:flex-row">
                 <span className="text-sm text-gray-600 font-normal">
-                    Página {page} de {totalPages}
+                    Página {page} de {totalPaginas}
                 </span>
                 <div className="flex gap-2">
                     <button
@@ -227,9 +237,9 @@ export const MedicamentosTable = ({
                     </button>
                     <button
                         onClick={() =>
-                            setPage((prev) => Math.min(prev + 1, totalPages))
+                            setPage((prev) => Math.min(prev + 1, totalPaginas))
                         }
-                        disabled={page === totalPages}
+                        disabled={page === totalPaginas || totalPaginas < 2}
                         className="flex items-center gap-1 px-3 py-1.5 border rounded text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                     >
                         Próxima <ChevronRight className="h-4 w-4" />

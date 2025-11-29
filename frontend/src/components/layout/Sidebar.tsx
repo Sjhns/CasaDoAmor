@@ -5,7 +5,7 @@ export const Sidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <aside className="w-60 p-4 flex flex-col border-r border-gray-300 shadow-md min-h-screen h-full">
+    <aside className="w-60 p-4 flex flex-col border-r border-gray-300 shadow-md sticky top-0 h-screen overflow-auto">
       <nav className="flex-1 space-y-3">
         <button 
           onClick={() => navigate('/')}
