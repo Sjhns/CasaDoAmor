@@ -1,19 +1,16 @@
-package com.casaDoAmor.CasaDoAmor.dto;
+package com.casaDoAmor.CasaDoAmor.dtoAtualizar;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDate;
 import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class MedicamentoDTO {
+public class MedicamentoDTOAtualizar {
     private UUID id;
     @NotBlank
     private String nome;
-    @NotBlank
-    private String lote;
     @NotBlank
     private String formaFarmaceutica;
     @NotBlank
@@ -25,5 +22,7 @@ public class MedicamentoDTO {
     @NotBlank
     private String laboratorioFabricante;
     @NotNull
-    private LocalDate validade;
+    private Long estoqueMinimo;
+    @NotNull
+    private Long estoqueMaximo;
 }

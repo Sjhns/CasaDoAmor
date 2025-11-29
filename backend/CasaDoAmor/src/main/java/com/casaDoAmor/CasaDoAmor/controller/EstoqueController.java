@@ -2,56 +2,38 @@ package com.casaDoAmor.CasaDoAmor.controller;
 
 import java.util.stream.Collectors;
 import java.util.List;
-import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.casaDoAmor.CasaDoAmor.dto.EstoqueDTO;
+import org.springframework.web.bind.annotation.*;
+
+import com.casaDoAmor.CasaDoAmor.dtoCriar.EstoqueDTOCriar;
+import com.casaDoAmor.CasaDoAmor.dtoListar.EstoqueDTOListar; 
+import com.casaDoAmor.CasaDoAmor.dtoResposta.EstoqueDTOResposta; 
 import com.casaDoAmor.CasaDoAmor.model.Estoque;
 import com.casaDoAmor.CasaDoAmor.service.EstoqueService;
+
+import jakarta.validation.Valid;
+    
 
 @RestController
 @RequestMapping("/estoque")
 public class EstoqueController {
-    EstoqueService estoqueService;
+    private final EstoqueService estoqueService;
     public EstoqueController(EstoqueService estoqueService) {
         this.estoqueService = estoqueService;
     }
-    private Estoque paraModel(EstoqueDTO dto) {
-        Estoque entidade = new Estoque();
-        entidade.setQuantidade(dto.getQuantidade());
-        entidade.setEstoqueMinimo(dto.getEstoqueMinimo());
-        entidade.setEstoqueMaximo(dto.getEstoqueMaximo());
-        entidade.setStatus(dto.getStatus());
-        return entidade;
-    }
-    
-    private EstoqueDTO paraDTO(Estoque entidade) {
-        EstoqueDTO dto = new EstoqueDTO();
-        dto.setQuantidade(entidade.getQuantidade());
-        dto.setEstoqueMinimo(entidade.getEstoqueMinimo());
-        dto.setEstoqueMaximo(entidade.getEstoqueMaximo());
-        dto.setStatus(entidade.getStatus());
-        dto.setId(entidade.getId());
-        return dto;
-    }
     @PostMapping
-    public ResponseEntity<UUID> salvar(@RequestBody EstoqueDTO dto) {
-        Estoque entidadeParaSerSalva = paraModel(dto); 
-        Estoque entidadeSalva = estoqueService.salvar(entidadeParaSerSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva.getId());
+    public ResponseEntity<EstoqueDTOResposta> salvar(@Valid @RequestBody EstoqueDTOCriar dto) { 
+        Estoque novoEstoqueSalvo = estoqueService.salvar(dto); 
+        EstoqueDTOResposta dtoResposta = EstoqueDTOResposta.fromEntity(novoEstoqueSalvo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dtoResposta);
     }
     @GetMapping
-    public ResponseEntity<List<EstoqueDTO>> listar() {
+    public ResponseEntity<List<EstoqueDTOListar>> listar() { 
         List<Estoque> entidades = estoqueService.listarTodos();
-        List<EstoqueDTO> itens = entidades.stream()
-            .map(this::paraDTO)
+        List<EstoqueDTOListar> dtosListar = entidades.stream()
+            .map(EstoqueDTOListar::fromEntity)
             .collect(Collectors.toList());
-        return ResponseEntity.ok(itens);
+        return ResponseEntity.ok(dtosListar);
     }
 }
