@@ -37,11 +37,11 @@ export default function FilterModal({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex justify-center items-center"
       onClick={onClose} 
     >
       <div 
-        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl"
+        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl border border-gray-200"
         onClick={(e) => e.stopPropagation()} 
       >
         <div className="flex justify-between items-center mb-4">
@@ -63,8 +63,8 @@ export default function FilterModal({
                 onClick={() => onFilterClick(filter)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
                   ${isActive 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-zinc-200 text-zinc-700 hover:bg-zinc-300'}
+                    ? 'bg-sky-500 text-white hover:bg-sky-600' 
+                    : 'bg-zinc-200 text-zinc-700 hover:bg-sky-500 hover:text-white'}
                 `}
               >
                 {filter}
