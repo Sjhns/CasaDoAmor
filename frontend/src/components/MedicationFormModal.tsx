@@ -11,9 +11,9 @@ import { useEffect, useState } from "react";
 import ErrorModal from "../components/ErrorModal";
 
 interface MedicationFormModalProps {
-    medicationData?: FormData & { id: number | string };
+    medicationData?: FormData & { id: string };
     onClose: () => void;
-    onSuccessCreate?: (id: number) => void;
+    onSuccessCreate?: (id: string) => void;
 }
 
 const MedicationFormModal = (props: MedicationFormModalProps) => {
