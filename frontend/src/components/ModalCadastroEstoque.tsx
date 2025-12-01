@@ -165,7 +165,7 @@ export default function ModalCadastroEstoque({
     );
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white p-6 w-full max-w-md rounded-xl shadow-2xl animate-fadeIn">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">
                     Cadastrar Estoque
