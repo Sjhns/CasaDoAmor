@@ -12,7 +12,7 @@ import { Layout } from "../components/layout";
 import { API_URL } from "../constants";
 
 export const Dashboard = () => {
-    const [novoMedicamentoId, setNovoMedicamentoId] = useState<number | null>(
+    const [novoMedicamentoId, setNovoMedicamentoId] = useState<string | null>(
         null
     );
 
@@ -23,7 +23,7 @@ export const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCadastrarEstoqueOpen, setIsCadastrarEstoqueOpen] = useState(false);
     const [editingMed, setEditingMed] = useState<
-        (FormData & { id: number | string }) | undefined
+        (FormData & { id: string }) | undefined
     >(undefined);
 
     // const [tabelaBuscaQuery, setTabelaBuscaQuery] = useState("");
@@ -33,7 +33,7 @@ export const Dashboard = () => {
         setIsModalOpen(true);
     };
 
-    const handleMedicationCreated = (id: number) => {
+    const handleMedicationCreated = (id: string) => {
         setNovoMedicamentoId(id);
         setIsModalOpen(false); // Fecha o modal de medicamento
         setIsCadastrarEstoqueOpen(true); // Abre o modal de estoque
@@ -139,6 +139,7 @@ export const Dashboard = () => {
                 <ModalCadastroEstoque
                     onClose={handleCloseCadastrarEstoque}
                     open={isCadastrarEstoqueOpen}
+                    defaultMedicamentoId={novoMedicamentoId ?? undefined}
                 />
             )}
             {/* </div> */}
