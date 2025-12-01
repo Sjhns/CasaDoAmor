@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.casaDoAmor.CasaDoAmor.dtoAtualizar.MovimentarEstoqueDTOAtualizar;
+import com.casaDoAmor.CasaDoAmor.dtoAtualizar.MedicamentoDTOAtualizar;
 import com.casaDoAmor.CasaDoAmor.dtoCriar.MedicamentoDTOCriar;
 import com.casaDoAmor.CasaDoAmor.dtoListar.MedicamentoEstoqueDTOListar;
 import com.casaDoAmor.CasaDoAmor.model.DenominacaoGenerica;
@@ -89,6 +90,31 @@ public class MedicamentoService {
     public Medicamento buscarPorId(UUID id) {
         return medicamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ERRO 404: Medicamento não encontrado para o ID: " + id));
+    }
+
+    @Transactional
+    public Medicamento atualizar(UUID id, MedicamentoDTOAtualizar dto) {
+        Medicamento entidade = medicamentoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ERRO 404: Medicamento não encontrado para o ID: " + id));
+
+        if (dto.getDenominacaoGenericaId() != null) {
+            DenominacaoGenerica denominacaoGenerica = denominacaoGenericaService
+                    .buscarPorId(dto.getDenominacaoGenericaId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Denominação Genérica não encontrada para o ID fornecido."));
+            entidade.setDenominacaoGenerica(denominacaoGenerica);
+        }
+
+        entidade.setNome(dto.getNome());
+        entidade.setFormaFarmaceutica(dto.getFormaFarmaceutica());
+        entidade.setViaDeAdministracao(dto.getViaDeAdministracao());
+        entidade.setConcentracao(dto.getConcentracao());
+        entidade.setCategoriaTerapeutica(dto.getCategoriaTerapeutica());
+        entidade.setLaboratorioFabricante(dto.getLaboratorioFabricante());
+        entidade.setEstoqueMinimo(dto.getEstoqueMinimo());
+        entidade.setEstoqueMaximo(dto.getEstoqueMaximo());
+
+        return medicamentoRepository.save(entidade);
     }
 
     @Transactional
