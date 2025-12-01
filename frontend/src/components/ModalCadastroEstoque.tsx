@@ -37,6 +37,8 @@ export default function ModalCadastroEstoque({
         lote: "",
         validadeAposAberto: "",
     });
+    const [errors, setErrors] = useState<{ quantidade?: string }>(() => ({}));
+    const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
     useEffect(() => {
         if (open) {
@@ -117,7 +119,11 @@ export default function ModalCadastroEstoque({
 
         // Validações básicas (sem bloquear por estoque mínimo)
         if (form.quantidade === "") {
-            alert("Informe a quantidade.");
+            setErrors({ quantidade: "Informe a quantidade." });
+            return;
+        }
+        if (typeof form.quantidade === "number" && form.quantidade < 0) {
+            setErrors({ quantidade: "Quantidade não pode ser negativa." });
             return;
         }
         if (
@@ -141,7 +147,14 @@ export default function ModalCadastroEstoque({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(form),
         })
-            .then(() => onClose())
+            .then(() => {
+                setSuccessMsg("Estoque cadastrado com sucesso!");
+                // Fecha automaticamente após breve delay
+                setTimeout(() => {
+                    setSuccessMsg(null);
+                    onClose();
+                }, 1200);
+            })
             .catch((err) => console.error(err));
     };
 
@@ -157,6 +170,12 @@ export default function ModalCadastroEstoque({
                 <h2 className="text-xl font-bold text-gray-800 mb-4">
                     Cadastrar Estoque
                 </h2>
+
+                {successMsg && (
+                    <div className="mb-3 rounded bg-green-50 text-green-700 px-3 py-2 text-sm">
+                        {successMsg}
+                    </div>
+                )}
 
                 <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-1.5">
@@ -202,8 +221,13 @@ export default function ModalCadastroEstoque({
                             type="number"
                             name="quantidade"
                             onChange={handleChange}
-                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            className={`px-4 py-2.5 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.quantidade ? "border-red-500" : "border-gray-300"}`}
                         />
+                        {errors.quantidade && (
+                            <span className="text-xs text-red-600 mt-1">
+                                {errors.quantidade}
+                            </span>
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-1.5">
