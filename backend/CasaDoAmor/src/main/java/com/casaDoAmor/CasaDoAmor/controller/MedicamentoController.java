@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.casaDoAmor.CasaDoAmor.dtoAtualizar.MovimentarEstoqueDTOAtualizar;
 import com.casaDoAmor.CasaDoAmor.dtoCriar.MedicamentoDTOCriar;
+import com.casaDoAmor.CasaDoAmor.dtoAtualizar.MedicamentoDTOAtualizar;
 import com.casaDoAmor.CasaDoAmor.dtoListar.MedicamentoEstoqueDTOListar;
 import com.casaDoAmor.CasaDoAmor.dtoResposta.EstoqueDTOResposta;
 import com.casaDoAmor.CasaDoAmor.dtoResposta.MedicamentoDTOResposta;
@@ -61,5 +63,13 @@ public class MedicamentoController {
         Medicamento entidade = medicamentoService.buscarPorId(id);
         MedicamentoDTOResposta dto = MedicamentoDTOResposta.fromEntity(entidade);
         return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MedicamentoDTOResposta> atualizar(@PathVariable UUID id,
+            @Valid @RequestBody MedicamentoDTOAtualizar dto) {
+        Medicamento atualizado = medicamentoService.atualizar(id, dto);
+        MedicamentoDTOResposta response = MedicamentoDTOResposta.fromEntity(atualizado);
+        return ResponseEntity.ok(response);
     }
 }
