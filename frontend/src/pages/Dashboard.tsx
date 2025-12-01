@@ -1,4 +1,3 @@
-import { Search, PackageOpen, User } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
 // import MedicationFormModal from "../components/MedicationFormModal";
@@ -99,8 +98,7 @@ export const Dashboard = () => {
                                 />
                             </div>
 
-                            <div className="flex gap-2 md:gap-4 w-full md:w-auto justify-end md:ml-auto flex-shrink-0">
-                                <button className="p-2.5 hover:bg-gray-100 rounded-lg transition-colors"></button>
+                            <div className="flex gap-2 md:gap-4 w-full md:w-auto justify-end md:ml-auto shrink-0">
                                 <button
                                     onClick={() => handleOpenCadastrarEstoque()}
                                     className="bg-sky-500 text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-sky-600 transition-colors text-sm md:text-base whitespace-nowrap"
