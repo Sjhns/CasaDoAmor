@@ -92,22 +92,22 @@ export default function ModalCadastroEstoque({
     );
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-white p-6 w-full max-w-md rounded-lg shadow-xl animate-fadeIn">
-                <h2 className="text-xl font-semibold mb-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white p-6 w-full max-w-md rounded-xl shadow-2xl animate-fadeIn">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
                     Cadastrar Estoque
                 </h2>
 
-                <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">
+                <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
                             Medicamento
                         </label>
                         <select
                             name="medicamentoId"
                             value={form.medicamentoId}
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         >
                             <option value="">Selecione...</option>
                             {medicamentos.map((m) => (
@@ -134,45 +134,45 @@ export default function ModalCadastroEstoque({
                         </div>
                     )}
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
                             Quantidade
                         </label>
                         <input
                             type="number"
                             name="quantidade"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">Status</label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">Status</label>
                         <input
                             name="status"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">Lote</label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">Lote</label>
                         <input
                             name="lote"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
                             Validade Após Aberto
                         </label>
                         <input
                             type="date"
                             name="validadeAposAberto"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
 

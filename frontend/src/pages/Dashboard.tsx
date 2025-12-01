@@ -66,12 +66,12 @@ export const Dashboard = () => {
                 {/* Main Content */}
                 <main className="flex-1 bg-gray-50 p-2">
                     <div className="bg-white rounded-2xl shadow-sm p-4 md:p-8">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-8 text-center md:text-left">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-16 mt-8 text-center">
                             Estoque geral de remédios
                         </h1>
 
                         {/* Search and Actions */}
-                        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mb-4 md:mb-6">
+                        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-4 mb-16">
                             <div className="w-full md:flex-1 md:max-w-2xl relative">
                                 <SearchBar
                                     value={tabelaBusca}
@@ -80,16 +80,16 @@ export const Dashboard = () => {
                                 />
                             </div>
 
-                            <div className="flex gap-2 md:gap-4 w-full md:w-auto justify-between md:justify-start">
+                            <div className="flex gap-2 md:gap-4 w-full md:w-auto justify-end md:ml-auto flex-shrink-0">
                                 <button className="p-2.5 hover:bg-gray-100 rounded-lg transition-colors"></button>
                                 <button
                                     onClick={() => handleOpenCadastrarEstoque()}
-                                    className="bg-sky-500 text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-sky-600 transition-colors text-sm md:text-base"
+                                    className="bg-sky-500 text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-sky-600 transition-colors text-sm md:text-base whitespace-nowrap"
                                 >
                                     Cadastrar estoque
                                 </button>
                                 <button
-                                    className="bg-black text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm md:text-base"
+                                    className="bg-black text-white px-4 md:px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm md:text-base whitespace-nowrap"
                                     onClick={handleOpenCreateModal}
                                 >
                                     Adicionar remédio
@@ -117,7 +117,6 @@ export const Dashboard = () => {
                 <ModalCadastroEstoque
                     onClose={handleCloseCadastrarEstoque}
                     open={isCadastrarEstoqueOpen}
-                    medicamentoId={novoMedicamentoId}
                 />
             )}
             {/* </div> */}

@@ -93,23 +93,24 @@ export default function HistoricoPage() {
 
   return (
     <Layout>
-      <main className="flex-1 px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-6 mt-8">
-            <h1 className="text-3xl font-bold text-zinc-800 mb-4 text-center">
-              Histórico de Operações
-            </h1>
+      <main className="flex-1 bg-gray-50 p-2">
+        <div className="bg-white rounded-2xl shadow-sm p-4 md:p-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-6 mt-8">
+              <h1 className="text-3xl font-bold text-zinc-800 mb-4 text-center">
+                Histórico de Operações
+              </h1>
 
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mt-16">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mt-16">
               <div className="relative flex-1 max-w-lg">
                 <input
                   type="text"
                   placeholder="Pesquise por usuário, remédio, tipo..."
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-4 pr-10 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
               </div>
 
               <div className="flex gap-2">
@@ -154,6 +155,7 @@ export default function HistoricoPage() {
             }}
           />
         </div>
+      </div>
       </main>
     </Layout>
   );
