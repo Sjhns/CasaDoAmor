@@ -115,9 +115,6 @@ public class MedicamentoService {
                 if (novoSaldoUnidadeEstoque < 0) {
                     throw new RuntimeException("SAÍDA INVÁLIDA: Quantidade insuficiente no Lote.");
                 }
-                if (novoSaldoTotal < estoqueMinimo) {
-                    throw new RuntimeException("SAÍDA INVÁLIDA: O saldo TOTAL (" + novoSaldoTotal + ") é inferior ao estoque mínimo (" + estoqueMinimo + ").");
-                }
                 if (novoSaldoUnidadeEstoque == 0) {
                     medicamento.getEstoques().remove(unidadeEstoque); 
                     estoqueRepository.delete(unidadeEstoque); 
