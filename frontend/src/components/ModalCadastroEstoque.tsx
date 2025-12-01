@@ -49,7 +49,10 @@ export default function ModalCadastroEstoque({
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value, type } = e.target as HTMLInputElement;
+        const parsedValue =
+            type === "number" ? (value === "" ? "" : Number(value)) : value;
+        setForm({ ...form, [name]: parsedValue } as FormEstoque);
     };
 
     const handleSubmit = () => {
@@ -58,22 +61,25 @@ export default function ModalCadastroEstoque({
         );
         if (!med) return;
 
-        // Validação de quantidade mínima e máxima
+        // Validações básicas (sem bloquear por estoque mínimo)
         if (form.quantidade === "") {
             alert("Informe a quantidade.");
             return;
         }
-
-        if (form.quantidade < med.estoqueMinimo) {
-            alert(
-                `Quantidade abaixo do mínimo permitido: ${med.estoqueMinimo}`
-            );
-            return;
-        }
-
-        if (form.quantidade > med.estoqueMaximo) {
+        if (
+            typeof form.quantidade === "number" &&
+            form.quantidade > med.estoqueMaximo
+        ) {
             alert(`Quantidade acima do máximo permitido: ${med.estoqueMaximo}`);
             return;
+        }
+        if (
+            typeof form.quantidade === "number" &&
+            form.quantidade < med.estoqueMinimo
+        ) {
+            console.warn(
+                `Quantidade abaixo do mínimo: ${form.quantidade} < ${med.estoqueMinimo}`
+            );
         }
 
         fetch("http://localhost:8080/estoque", {
@@ -147,7 +153,9 @@ export default function ModalCadastroEstoque({
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="font-medium text-sm text-gray-700">Status</label>
+                        <label className="font-medium text-sm text-gray-700">
+                            Status
+                        </label>
                         <input
                             name="status"
                             onChange={handleChange}
@@ -156,7 +164,9 @@ export default function ModalCadastroEstoque({
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="font-medium text-sm text-gray-700">Lote</label>
+                        <label className="font-medium text-sm text-gray-700">
+                            Lote
+                        </label>
                         <input
                             name="lote"
                             onChange={handleChange}
