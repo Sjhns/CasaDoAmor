@@ -33,6 +33,8 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
     const queryClient = useQueryClient();
     const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [successMsg, setSuccessMsg] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleErrorModalClose = () => {
         setIsErrorModalOpen(false);
@@ -42,15 +44,14 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
 
     const onSubmit = async (data: FormData) => {
         try {
+            setIsSubmitting(true);
             if (medicationData) {
                 const id = medicationData.id;
                 const url = `${API_URL}/medicamento/${id}`;
-                const response = await axios.put(url, data);
+                await axios.put(url, data);
             } else {
                 const url = `${API_URL}/medicamento`;
                 const response = await axios.post(url, data);
-                console.log("POST: ", response.data);
-
                 const createdId = response.data.id;
                 if (onSuccessCreate && createdId) {
                     onSuccessCreate(createdId);
@@ -58,7 +59,15 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
             }
 
             await queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
-            onClose(); // Sucesso: fecha o modal do formulário
+            setSuccessMsg(
+                medicationData
+                    ? "Medicamento atualizado com sucesso!"
+                    : "Medicamento criado com sucesso!"
+            );
+            setTimeout(() => {
+                setSuccessMsg(null);
+                onClose();
+            }, 1200);
         } catch (error) {
             let friendlyMessage = "Erro inesperado. Tente novamente.";
 
@@ -82,6 +91,8 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
 
             setErrorMessage(friendlyMessage);
             setIsErrorModalOpen(true);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -159,6 +170,12 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
                                 : "Adicionar Medicamento"}
                         </h2>
                     </div>
+
+                    {successMsg && (
+                        <div className="mx-6 mt-3 rounded bg-green-50 text-green-700 px-3 py-2 text-sm">
+                            {successMsg}
+                        </div>
+                    )}
 
                     {/* Form Content (COM OS CAMPOS ATUALIZADOS) */}
                     <div className="overflow-y-auto flex-1 px-6 py-4">
@@ -419,7 +436,8 @@ const MedicationFormModal = (props: MedicationFormModalProps) => {
                         <button
                             type="submit"
                             form="medication-form"
-                            className="px-6 py-2.5 rounded-lg font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            disabled={isSubmitting}
+                            className={`px-6 py-2.5 rounded-lg font-medium text-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSubmitting ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
                         >
                             {medicationData
                                 ? "Salvar Alterações"
