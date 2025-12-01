@@ -19,6 +19,7 @@ export interface MedicamentoResponse {
     nomeMedicamento: string;
     lote?: string | null;
     validade?: string | null;
+    quantidadeTotalEstoque?: number;
 }
 
 // info para paginacao
