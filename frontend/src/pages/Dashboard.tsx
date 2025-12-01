@@ -1,5 +1,6 @@
 import { Search, PackageOpen, User } from "lucide-react";
 import { useState } from "react";
+import axios from "axios";
 // import MedicationFormModal from "../components/MedicationFormModal";
 import { MedicamentosTable } from "../components/MedicamentoTable";
 import { SearchBar } from "../components/SearchBar";
@@ -8,6 +9,7 @@ import MedicationFormModal from "../components/MedicationFormModal";
 import { type FormData } from "../schemas/MedicationFormModal.schema"; //
 import ModalCadastroEstoque from "../components/ModalCadastroEstoque";
 import { Layout } from "../components/layout";
+import { API_URL } from "../constants";
 
 export const Dashboard = () => {
     const [novoMedicamentoId, setNovoMedicamentoId] = useState<number | null>(
@@ -37,11 +39,28 @@ export const Dashboard = () => {
         setIsCadastrarEstoqueOpen(true); // Abre o modal de estoque
     };
 
-    const handleOpenEditModal = (
-        medicamento: FormData & { id: number | string }
-    ) => {
-        setEditingMed(medicamento);
-        setIsModalOpen(true);
+    // Abre modal de edição buscando o medicamento por ID no backend
+    const handleOpenEditById = async (id: string) => {
+        try {
+            const { data } = await axios.get(`${API_URL}/medicamento/${id}`);
+            const formData: FormData & { id: string } = {
+                id: String(data.id),
+                nome: data.nome ?? "",
+                denominacaoGenericaId: data.denominacaoGenerica?.id ?? "",
+                formaFarmaceutica: data.formaFarmaceutica ?? "",
+                categoriaTerapeutica: data.categoriaTerapeutica ?? "",
+                laboratorioFabricante: data.laboratorioFabricante ?? "",
+                viaDeAdministracao: data.viaDeAdministracao ?? "",
+                concentracao: data.concentracao ?? "",
+                estoqueMinimo: String(data.estoqueMinimo ?? ""),
+                estoqueMaximo: String(data.estoqueMaximo ?? ""),
+            };
+            setEditingMed(formData);
+            setIsModalOpen(true);
+        } catch (e) {
+            console.error("Falha ao buscar medicamento por ID", e);
+            alert("Não foi possível carregar o medicamento para edição.");
+        }
     };
 
     const handleCloseModal = () => {
@@ -99,7 +118,10 @@ export const Dashboard = () => {
 
                         {/* Table */}
                         <div className="overflow-x-auto">
-                            <MedicamentosTable searchTerm={debaunceBusca} />
+                            <MedicamentosTable
+                                searchTerm={debaunceBusca}
+                                onEdit={handleOpenEditById}
+                            />
                         </div>
                     </div>
                 </main>
