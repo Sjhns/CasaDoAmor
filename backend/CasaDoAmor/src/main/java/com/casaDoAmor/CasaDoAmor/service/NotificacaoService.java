@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Service
 public class NotificacaoService {
 
@@ -21,9 +22,9 @@ public class NotificacaoService {
     private final EstoqueRepository estoqueRepo;
 
     public NotificacaoService(MedicamentoRepository medRepo,
-                              NotificacaoRepository notRepo,
-                              EmailService emailSvc,
-                              EstoqueRepository estoqueRepo) {
+            NotificacaoRepository notRepo,
+            EmailService emailSvc,
+            EstoqueRepository estoqueRepo) {
         this.medicamentoRepo = medRepo;
         this.notificacaoRepo = notRepo;
         this.emailService = emailSvc;
