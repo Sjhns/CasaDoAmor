@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
+import { API_URL } from "../constants";
 
 interface ModalCadastroEstoqueProps {
     open: boolean;
     onClose: () => void;
+    defaultMedicamentoId?: string;
 }
 
 interface Medicamento {
@@ -25,6 +27,7 @@ interface FormEstoque {
 export default function ModalCadastroEstoque({
     open,
     onClose,
+    defaultMedicamentoId,
 }: ModalCadastroEstoqueProps) {
     const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
     const [form, setForm] = useState<FormEstoque>({
@@ -38,13 +41,64 @@ export default function ModalCadastroEstoque({
     useEffect(() => {
         if (open) {
             fetch(
-                "http://localhost:8080/medicamento?page=1&per_page=50&sort_by=nome&sort_dir=asc"
+                `${API_URL}/medicamento?page=1&per_page=50&sort_by=nome&sort_dir=asc`
             )
                 .then((res) => res.json())
-                .then((data) => setMedicamentos(data.itens || []))
+                .then(async (data) => {
+                    const itens = data.itens || [];
+                    setMedicamentos(itens);
+                    if (defaultMedicamentoId) {
+                        // seta seleção
+                        setForm((prev) => ({
+                            ...prev,
+                            medicamentoId: defaultMedicamentoId,
+                        }));
+                        // se o item não estiver na lista, busca por ID e adiciona
+                        const exists = itens.some(
+                            (m: Medicamento) =>
+                                m.idMedicamento === defaultMedicamentoId
+                        );
+                        if (!exists) {
+                            try {
+                                const resp = await fetch(
+                                    `${API_URL}/medicamento/${defaultMedicamentoId}`
+                                );
+                                if (resp.ok) {
+                                    const med = await resp.json();
+                                    const mapped: Medicamento = {
+                                        idMedicamento: med.id,
+                                        nomeMedicamento: med.nome,
+                                        concentracao: med.concentracao,
+                                        estoqueMinimo: med.estoqueMinimo,
+                                        estoqueMaximo: med.estoqueMaximo,
+                                    };
+                                    setMedicamentos((prev) => [
+                                        mapped,
+                                        ...prev,
+                                    ]);
+                                }
+                            } catch (e) {
+                                console.warn(
+                                    "Não foi possível carregar o medicamento pré-selecionado",
+                                    e
+                                );
+                            }
+                        }
+                    }
+                })
                 .catch((err) => console.error(err));
         }
-    }, [open]);
+    }, [open, defaultMedicamentoId]);
+
+    // Ao alterar o defaultMedicamentoId enquanto aberto, refletir no formulário
+    useEffect(() => {
+        if (open && defaultMedicamentoId) {
+            setForm((prev) => ({
+                ...prev,
+                medicamentoId: defaultMedicamentoId,
+            }));
+        }
+    }, [defaultMedicamentoId, open]);
 
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -82,7 +136,7 @@ export default function ModalCadastroEstoque({
             );
         }
 
-        fetch("http://localhost:8080/estoque", {
+        fetch(`${API_URL}/estoque`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(form),
