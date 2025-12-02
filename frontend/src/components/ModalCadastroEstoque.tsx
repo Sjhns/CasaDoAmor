@@ -39,21 +39,30 @@ export default function ModalCadastroEstoque({
     });
 
     // NOVO: Adicionei a tipagem para validadeAposAberto nos erros
-    const [errors, setErrors] = useState<{ quantidade?: string; validadeAposAberto?: string }>(() => ({}));
+    const [errors, setErrors] = useState<{
+        quantidade?: string;
+        validadeAposAberto?: string;
+    }>(() => ({}));
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // NOVO: Effect para validar a data sempre que o usuário altera o campo 'validadeAposAberto'
     useEffect(() => {
         if (form.validadeAposAberto) {
             // Quebra a string "YYYY-MM-DD" para criar a data localmente e evitar bugs de timezone (UTC)
-            const [ano, mes, dia] = form.validadeAposAberto.split('-').map(Number);
+            const [ano, mes, dia] = form.validadeAposAberto
+                .split("-")
+                .map(Number);
             const dataValidade = new Date(ano, mes - 1, dia); // Mês em JS começa em 0
 
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0); // Zera horas, minutos, segundos para comparar apenas o dia
 
             if (dataValidade < hoje) {
-                setErrors((prev) => ({ ...prev, validadeAposAberto: "O remédio já está vencido." }));
+                setErrors((prev) => ({
+                    ...prev,
+                    validadeAposAberto: "O remédio já está vencido.",
+                }));
             } else {
                 setErrors((prev) => {
                     const newErrs = { ...prev };
@@ -62,10 +71,10 @@ export default function ModalCadastroEstoque({
                 });
             }
         } else {
-             // Limpa erro se o campo estiver vazio
+            // Limpa erro se o campo estiver vazio
             setErrors((prev) => {
                 const newErrs = { ...prev };
-                delete newErrs.validadeAposAberto; 
+                delete newErrs.validadeAposAberto;
                 return newErrs;
             });
         }
@@ -140,6 +149,7 @@ export default function ModalCadastroEstoque({
     };
 
     const handleSubmit = () => {
+        if (isSubmitting) return; // evita múltiplos envios
         // NOVO: Bloqueio extra no submit caso haja erro de data
         if (errors.validadeAposAberto) return;
 
@@ -149,11 +159,17 @@ export default function ModalCadastroEstoque({
         if (!med) return;
 
         if (form.quantidade === "") {
-            setErrors((prev) => ({ ...prev, quantidade: "Informe a quantidade." }));
+            setErrors((prev) => ({
+                ...prev,
+                quantidade: "Informe a quantidade.",
+            }));
             return;
         }
         if (typeof form.quantidade === "number" && form.quantidade < 0) {
-            setErrors((prev) => ({ ...prev, quantidade: "Quantidade não pode ser negativa." }));
+            setErrors((prev) => ({
+                ...prev,
+                quantidade: "Quantidade não pode ser negativa.",
+            }));
             return;
         }
         if (
@@ -163,9 +179,10 @@ export default function ModalCadastroEstoque({
             alert(`Quantidade acima do máximo permitido: ${med.estoqueMaximo}`);
             return;
         }
-        
+
         // ... restante das validações
-        
+
+        setIsSubmitting(true);
         fetch(`${API_URL}/estoque`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -178,7 +195,12 @@ export default function ModalCadastroEstoque({
                     onClose();
                 }, 1200);
             })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+                console.error(err);
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
     };
 
     if (!open) return null;
@@ -188,7 +210,7 @@ export default function ModalCadastroEstoque({
     );
 
     // NOVO: Verifica se existe algum erro bloqueante para desabilitar o botão
-    const hasBlockingErrors = !!errors.validadeAposAberto; 
+    const hasBlockingErrors = !!errors.validadeAposAberto;
 
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -249,6 +271,7 @@ export default function ModalCadastroEstoque({
                             type="number"
                             name="quantidade"
                             onChange={handleChange}
+                            disabled={isSubmitting}
                             className={`px-4 py-2.5 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.quantidade ? "border-red-500" : "border-gray-300"}`}
                         />
                         {errors.quantidade && (
@@ -265,6 +288,7 @@ export default function ModalCadastroEstoque({
                         <input
                             name="status"
                             onChange={handleChange}
+                            disabled={isSubmitting}
                             className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
@@ -276,6 +300,7 @@ export default function ModalCadastroEstoque({
                         <input
                             name="lote"
                             onChange={handleChange}
+                            disabled={isSubmitting}
                             className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
@@ -294,11 +319,14 @@ export default function ModalCadastroEstoque({
                             type="date"
                             name="validadeAposAberto"
                             onChange={handleChange}
+                            disabled={isSubmitting}
                             // NOVO: Adicionei borda vermelha condicional também
                             className={`px-4 py-2.5 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 transition-all 
-                                ${errors.validadeAposAberto 
-                                    ? "border-red-500 focus:ring-red-500" 
-                                    : "border-gray-300 focus:ring-blue-500 focus:border-transparent"}`}
+                                ${
+                                    errors.validadeAposAberto
+                                        ? "border-red-500 focus:ring-red-500"
+                                        : "border-gray-300 focus:ring-blue-500 focus:border-transparent"
+                                }`}
                         />
                     </div>
 
@@ -311,14 +339,16 @@ export default function ModalCadastroEstoque({
                         </button>
                         <button
                             // NOVO: Propriedade disabled e classes de estilo para estado desabilitado
-                            disabled={hasBlockingErrors}
+                            disabled={hasBlockingErrors || isSubmitting}
                             className={`px-6 py-2.5 rounded-lg font-medium text-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                                ${hasBlockingErrors 
-                                    ? "bg-gray-400 cursor-not-allowed opacity-70" 
-                                    : "bg-blue-600 hover:bg-blue-700"}`}
+                                ${
+                                    hasBlockingErrors || isSubmitting
+                                        ? "bg-gray-400 cursor-not-allowed opacity-70"
+                                        : "bg-blue-600 hover:bg-blue-700"
+                                }`}
                             onClick={handleSubmit}
                         >
-                            Cadastrar
+                            {isSubmitting ? "Cadastrando..." : "Cadastrar"}
                         </button>
                     </div>
                 </div>
