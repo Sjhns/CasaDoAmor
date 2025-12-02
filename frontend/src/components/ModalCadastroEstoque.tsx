@@ -37,8 +37,39 @@ export default function ModalCadastroEstoque({
         lote: "",
         validadeAposAberto: "",
     });
-    const [errors, setErrors] = useState<{ quantidade?: string }>(() => ({}));
+
+    // NOVO: Adicionei a tipagem para validadeAposAberto nos erros
+    const [errors, setErrors] = useState<{ quantidade?: string; validadeAposAberto?: string }>(() => ({}));
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+    // NOVO: Effect para validar a data sempre que o usuário altera o campo 'validadeAposAberto'
+    useEffect(() => {
+        if (form.validadeAposAberto) {
+            // Quebra a string "YYYY-MM-DD" para criar a data localmente e evitar bugs de timezone (UTC)
+            const [ano, mes, dia] = form.validadeAposAberto.split('-').map(Number);
+            const dataValidade = new Date(ano, mes - 1, dia); // Mês em JS começa em 0
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0); // Zera horas, minutos, segundos para comparar apenas o dia
+
+            if (dataValidade < hoje) {
+                setErrors((prev) => ({ ...prev, validadeAposAberto: "O remédio já está vencido." }));
+            } else {
+                setErrors((prev) => {
+                    const newErrs = { ...prev };
+                    delete newErrs.validadeAposAberto; // Remove o erro se a data for corrigida
+                    return newErrs;
+                });
+            }
+        } else {
+             // Limpa erro se o campo estiver vazio
+            setErrors((prev) => {
+                const newErrs = { ...prev };
+                delete newErrs.validadeAposAberto; 
+                return newErrs;
+            });
+        }
+    }, [form.validadeAposAberto]);
 
     useEffect(() => {
         if (open) {
@@ -50,12 +81,10 @@ export default function ModalCadastroEstoque({
                     const itens = data.itens || [];
                     setMedicamentos(itens);
                     if (defaultMedicamentoId) {
-                        // seta seleção
                         setForm((prev) => ({
                             ...prev,
                             medicamentoId: defaultMedicamentoId,
                         }));
-                        // se o item não estiver na lista, busca por ID e adiciona
                         const exists = itens.some(
                             (m: Medicamento) =>
                                 m.idMedicamento === defaultMedicamentoId
@@ -92,7 +121,6 @@ export default function ModalCadastroEstoque({
         }
     }, [open, defaultMedicamentoId]);
 
-    // Ao alterar o defaultMedicamentoId enquanto aberto, refletir no formulário
     useEffect(() => {
         if (open && defaultMedicamentoId) {
             setForm((prev) => ({
@@ -112,18 +140,20 @@ export default function ModalCadastroEstoque({
     };
 
     const handleSubmit = () => {
+        // NOVO: Bloqueio extra no submit caso haja erro de data
+        if (errors.validadeAposAberto) return;
+
         const med = medicamentos.find(
             (m) => m.idMedicamento === form.medicamentoId
         );
         if (!med) return;
 
-        // Validações básicas (sem bloquear por estoque mínimo)
         if (form.quantidade === "") {
-            setErrors({ quantidade: "Informe a quantidade." });
+            setErrors((prev) => ({ ...prev, quantidade: "Informe a quantidade." }));
             return;
         }
         if (typeof form.quantidade === "number" && form.quantidade < 0) {
-            setErrors({ quantidade: "Quantidade não pode ser negativa." });
+            setErrors((prev) => ({ ...prev, quantidade: "Quantidade não pode ser negativa." }));
             return;
         }
         if (
@@ -133,15 +163,9 @@ export default function ModalCadastroEstoque({
             alert(`Quantidade acima do máximo permitido: ${med.estoqueMaximo}`);
             return;
         }
-        if (
-            typeof form.quantidade === "number" &&
-            form.quantidade < med.estoqueMinimo
-        ) {
-            console.warn(
-                `Quantidade abaixo do mínimo: ${form.quantidade} < ${med.estoqueMinimo}`
-            );
-        }
-
+        
+        // ... restante das validações
+        
         fetch(`${API_URL}/estoque`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -149,7 +173,6 @@ export default function ModalCadastroEstoque({
         })
             .then(() => {
                 setSuccessMsg("Estoque cadastrado com sucesso!");
-                // Fecha automaticamente após breve delay
                 setTimeout(() => {
                     setSuccessMsg(null);
                     onClose();
@@ -163,6 +186,9 @@ export default function ModalCadastroEstoque({
     const medicamentoSelecionado = medicamentos.find(
         (m) => m.idMedicamento === form.medicamentoId
     );
+
+    // NOVO: Verifica se existe algum erro bloqueante para desabilitar o botão
+    const hasBlockingErrors = !!errors.validadeAposAberto; 
 
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -178,6 +204,7 @@ export default function ModalCadastroEstoque({
                 )}
 
                 <div className="flex flex-col gap-4">
+                    {/* ... (Select de Medicamento - sem alterações) ... */}
                     <div className="flex flex-col gap-1.5">
                         <label className="font-medium text-sm text-gray-700">
                             Medicamento
@@ -213,6 +240,7 @@ export default function ModalCadastroEstoque({
                         </div>
                     )}
 
+                    {/* ... (Input Quantidade - sem alterações) ... */}
                     <div className="flex flex-col gap-1.5">
                         <label className="font-medium text-sm text-gray-700">
                             Quantidade
@@ -256,11 +284,21 @@ export default function ModalCadastroEstoque({
                         <label className="font-medium text-sm text-gray-700">
                             Validade Após Aberto
                         </label>
+                        {/* NOVO: Exibe mensagem de erro acima do campo se existir */}
+                        {errors.validadeAposAberto && (
+                            <span className="text-xs font-bold text-red-600 mb-1 animate-pulse">
+                                {errors.validadeAposAberto}
+                            </span>
+                        )}
                         <input
                             type="date"
                             name="validadeAposAberto"
                             onChange={handleChange}
-                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            // NOVO: Adicionei borda vermelha condicional também
+                            className={`px-4 py-2.5 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 transition-all 
+                                ${errors.validadeAposAberto 
+                                    ? "border-red-500 focus:ring-red-500" 
+                                    : "border-gray-300 focus:ring-blue-500 focus:border-transparent"}`}
                         />
                     </div>
 
@@ -272,7 +310,12 @@ export default function ModalCadastroEstoque({
                             Cancelar
                         </button>
                         <button
-                            className="px-6 py-2.5 rounded-lg font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            // NOVO: Propriedade disabled e classes de estilo para estado desabilitado
+                            disabled={hasBlockingErrors}
+                            className={`px-6 py-2.5 rounded-lg font-medium text-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                                ${hasBlockingErrors 
+                                    ? "bg-gray-400 cursor-not-allowed opacity-70" 
+                                    : "bg-blue-600 hover:bg-blue-700"}`}
                             onClick={handleSubmit}
                         >
                             Cadastrar
