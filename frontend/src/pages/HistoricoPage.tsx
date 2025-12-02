@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { FiFilter, FiTrash2, FiSearch } from "react-icons/fi";
+import React, { useState, useEffect, useCallback } from "react";
+import { FiFilter, FiSearch } from "react-icons/fi";
 import OperationItem from "../components/OperationItem";
 import FilterModal from "../components/FilterModal";
 import type { Operation } from "../types/operation";
 import { API_URL } from "../constants";
 import { Layout } from "../components/layout";
 
+type ActiveFilters = Record<string, string>;
+
 export default function HistoricoPage() {
   const [allOperations, setAllOperations] = useState<Operation[]>([]);
   const [filteredOperations, setFilteredOperations] = useState<Operation[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
 
+  // DTO que vem do Backend
   type BackendHistoricoDTO = {
     idHistorico: string;
     tipo?: string | null;
     medicamentoNome?: string | null;
     dataMovimentacao: string | Date;
     usuarioNome?: string | null;
+    destinatario?: string | null;
     observacao?: string | null;
   };
 
@@ -27,14 +31,15 @@ export default function HistoricoPage() {
       id: dto.idHistorico,
       type: dto.tipo ?? "Operação",
       name: dto.medicamentoNome ?? "Não informado",
-      date: new Date(dto.dataMovimentacao).toLocaleDateString("pt-BR"),
+      date: new Date(dto.dataMovimentacao).toLocaleString("pt-BR"),
       user: dto.usuarioNome ?? "Sistema",
-      level: "N/A", // backend não envia, deixei padrão
+      recipient: dto.destinatario ?? undefined, // Agora o 'recipient' existe no tipo Operation!
+      level: "N/A",
       obs: dto.observacao ?? "",
     };
   };
 
-  const obterHistorico = async () => {
+  const obterHistorico = useCallback(async () => {
     try {
       const response = await fetch(
         `${API_URL}/api/historico?page=0&size=1000&sort=dataMovimentacao,desc`
@@ -45,26 +50,22 @@ export default function HistoricoPage() {
       }
 
       const data = await response.json();
-
-      // Se o backend usa Page<?> → data.content
       const lista = Array.isArray(data) ? data : data.content;
-
-      const operations: Operation[] = lista.map(mapBackendToOperation);
+      const safeLista = Array.isArray(lista) ? lista : [];
+      
+      const operations: Operation[] = safeLista.map(mapBackendToOperation);
 
       setAllOperations(operations);
       setFilteredOperations(operations);
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     obterHistorico();
-  }, []);
+  }, [obterHistorico]);
 
-  // ============================
-  // 🔎 FILTROS + BUSCA
-  // ============================
   useEffect(() => {
     let result = [...allOperations];
 
@@ -108,7 +109,7 @@ export default function HistoricoPage() {
                   placeholder="Pesquise por usuário, remédio, tipo..."
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  className="w-full pl-4 pr-10 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-4 pr-10 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-shadow"
                 />
                 <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
               </div>
@@ -116,30 +117,25 @@ export default function HistoricoPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="p-2 border border-zinc-300 rounded-lg hover:bg-zinc-100"
+                  className="p-2.5 border border-zinc-300 rounded-lg hover:bg-zinc-100 flex items-center gap-2 text-zinc-700 transition-colors"
                   aria-label="Filtrar"
                 >
-                  <FiFilter className="w-5 h-5 text-zinc-700" />
-                </button>
-                <button
-                  className="p-2 border border-zinc-300 rounded-lg hover:bg-zinc-100"
-                  aria-label="Limpar histórico"
-                >
-                  <FiTrash2 className="w-5 h-5 text-zinc-700" />
+                  <FiFilter className="w-5 h-5" />
+                  <span className="hidden sm:inline text-sm font-medium">Filtros</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="operation-list mt-16">
+          <div className="mt-8 space-y-3">
             {filteredOperations.length > 0 ? (
               filteredOperations.map((op) => (
                 <OperationItem key={op.id} operation={op} />
               ))
             ) : (
-              <p className="text-center text-zinc-500 mt-10">
-                Nenhuma operação encontrada para esta busca.
-              </p>
+              <div className="text-center py-12">
+                  <p className="text-zinc-500">Nenhuma operação encontrada.</p>
+              </div>
             )}
           </div>
 
@@ -147,7 +143,7 @@ export default function HistoricoPage() {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             activeFilters={activeFilters}
-            onFilterClick={(filter) => {
+            onFilterClick={(filter: string) => {
               console.log("Ativar filtro:", filter);
             }}
             onClearFilters={() => {
