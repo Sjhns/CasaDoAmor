@@ -6,7 +6,6 @@ import com.casaDoAmor.CasaDoAmor.repository.HistoricoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,38 +19,28 @@ public class HistoricoService {
         this.historicoRepository = historicoRepository;
     }
 
-    @Transactional(readOnly = true)
+    // --- MÉTODO PRINCIPAL DE REGISTRO ---
+    public void registrar(String tipo, String nomeMedicamento, String nomeUsuario, String observacao, String destinatario) {
+        Historico h = new Historico();
+        h.setTipo(tipo);
+        h.setMedicamentoNome(nomeMedicamento);
+        h.setUsuarioNome(nomeUsuario != null ? nomeUsuario : "Sistema");
+        h.setObservacao(observacao);
+        h.setDestinatario(destinatario);
+        // dataMovimentacao é setada pelo @PrePersist na model
+        
+        historicoRepository.save(h);
+    }
+
+    // Método de busca para o Controller
     public Page<HistoricoResponseDTO> buscarHistorico(
-            LocalDateTime dataInicio,
-            LocalDateTime dataFim,
-            UUID usuarioId,
-            UUID medicamentoId,
-            String tipo,
-            Pageable pageable
-    ) {
-        Page<Historico> paginaHistorico = historicoRepository.findByFilters(
-            dataInicio, dataFim, usuarioId, medicamentoId, tipo, pageable
-        );
-
-        return paginaHistorico.map(this::paraDTO);
+            LocalDateTime dataInicio, LocalDateTime dataFim, 
+            String usuarioNome, String medicamentoNome, String tipo, 
+            Pageable pageable) {
+        
+        return historicoRepository.buscarComFiltros(
+                tipo, usuarioNome, medicamentoNome, dataInicio, dataFim, pageable
+        ).map(HistoricoResponseDTO::fromEntity);
     }
 
-    private HistoricoResponseDTO paraDTO(Historico entidade) {
-        HistoricoResponseDTO dto = new HistoricoResponseDTO();
-        dto.setIdHistorico(entidade.getId());
-        dto.setDataMovimentacao(entidade.getDataMovimentacao());
-        dto.setTipo(entidade.getTipo());
-        dto.setObservacao(entidade.getObservacao());
-        
-        if (entidade.getUsuario() != null) {
-            dto.setUsuarioId(entidade.getUsuario().getId());
-            dto.setUsuarioNome(entidade.getUsuario().getNome());
-        }
-        if (entidade.getMedicamento() != null) {
-            dto.setMedicamentoId(entidade.getMedicamento().getId());
-            dto.setMedicamentoNome(entidade.getMedicamento().getNome());
-        }
-        
-        return dto;
-    }
 }

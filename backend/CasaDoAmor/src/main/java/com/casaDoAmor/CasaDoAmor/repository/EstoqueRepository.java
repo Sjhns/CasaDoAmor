@@ -9,11 +9,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 @Repository
 public interface EstoqueRepository extends JpaRepository<Estoque, UUID> {
 
     List<Estoque> findByQuantidade(long quantidade);
+
     List<Estoque> findByStatus(String status);
-    List<Estoque> findByLote(String lote);  
+
+    List<Estoque> findByLote(String lote);
+
     List<Estoque> findByMedicamentoId(UUID medicamentoId);
 }

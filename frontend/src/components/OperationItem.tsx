@@ -1,69 +1,75 @@
 import { useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
-// Importamos o tipo que acabamos de definir
 import type { Operation } from '../types/operation';
 
-// 1. Definimos o tipo das props que este componente recebe
 interface OperationItemProps {
   operation: Operation;
 }
 
-// 2. Aplicamos o tipo às props na definição da função
 export default function OperationItem({ operation }: OperationItemProps) {
-  // 3. Tipamos o estado (boa prática)
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-  // O resto do código JSX é idêntico...
-  const title = `${operation.type}: ${operation.name}`;
+  const isSaida = operation.type === 'SAIDA';
+  const isEntrada = operation.type === 'ENTRADA' || operation.type === 'CADASTRO';
+  
+  const typeColor = isSaida ? "text-red-700 bg-red-50" : (isEntrada ? "text-green-700 bg-green-50" : "text-gray-700 bg-gray-100");
 
   return (
-    <div className="bg-zinc-100 rounded-lg p-4 shadow-sm mb-4">
-      {/* --- Seção Superior (Sempre visível) --- */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        {/* Esquerda: Título e Data */}
+    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-3 hover:shadow-md hover:bg-gray-50 transition-all duration-200 cursor-default">
+      {/* --- Seção Superior --- */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-zinc-800">{title}</h3>
-          <p className="sm:hidden text-sm text-zinc-500 mb-2">{operation.date}</p>
-        </div>
-        
-        {/* Direita: Data (desktop) */}
-        <div className="hidden sm:block">
-          <span className="text-sm text-zinc-600">{operation.date}</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className={`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide ${typeColor}`}>
+                {operation.type}
+            </span>
+            <span className="text-xs text-gray-400">{operation.date}</span>
+          </div>
+          <h3 className="text-lg font-bold text-gray-900">{operation.name}</h3>
         </div>
       </div>
 
-      {/* --- Seção do Meio (Sempre visível) --- */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-700 mt-2">
-        <span><strong>Usuário:</strong> {operation.user}</span>
-        <span><strong>Nível:</strong> {operation.level}</span>
-        <span><strong>Obs.:</strong> {operation.obs.substring(0, 50)}...</span>
+      {/* --- Seção do Meio --- */}
+      <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600 mt-3">
+        {/* Usuário (Quem fez a ação) */}
+        <span>
+            <strong className="text-gray-900">Usuário:</strong> {operation.user}
+        </span>
+
+        {/* Paciente (Quem recebeu - antigo Destinatário) */}
+        {operation.recipient && (
+            <span>
+                <strong className="text-gray-900">Paciente:</strong> {operation.recipient}
+            </span>
+        )}
+
+        {/* Resumo da Obs */}
+        {!isExpanded && (
+            <span className="text-gray-500 italic truncate max-w-xs">
+                {operation.obs}
+            </span>
+        )}
       </div>
 
-      {/* --- Seção Inferior (Ações) --- */}
-      <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-200">
-        <button 
-          className="bg-blue-600 text-white px-4 py-1 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
-          onClick={() => console.log('Abrir estoque para o item:', operation.name)}
-        >
-          Estoque
-        </button>
+      {/* --- Botão Ver Mais --- */}
+      <div className="flex justify-end mt-2">
         <button 
           onClick={() => setIsExpanded(!isExpanded)}
-          className="p-2 rounded-full hover:bg-zinc-200"
-          aria-label="Ver mais"
+          className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
         >
+          {isExpanded ? "Menos detalhes" : "Ver detalhes"}
           <FiChevronDown 
-            className={`w-5 h-5 text-zinc-600 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
+            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
           />
         </button>
       </div>
 
-      {/* --- Conteúdo Expandido (Condicional) --- */}
+      {/* --- Conteúdo Expandido --- */}
       {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-zinc-200 text-zinc-700">
-          <h4 className="font-semibold mb-2">Detalhes da Operação</h4>
-          <p><strong>Observação completa:</strong> {operation.obs}</p>
-          <p><strong>ID da Operação:</strong> {operation.id}</p>
+        <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-700 animate-fadeIn">
+          <p><strong className="text-gray-900">Observação Completa:</strong></p>
+          <p className="mt-1 bg-gray-50 p-2 rounded text-gray-600">{operation.obs}</p>
+          <p className="mt-2 text-xs text-gray-400">ID do Registro: {operation.id}</p>
         </div>
       )}
     </div>

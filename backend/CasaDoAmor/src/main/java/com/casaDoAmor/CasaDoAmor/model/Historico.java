@@ -2,17 +2,16 @@ package com.casaDoAmor.CasaDoAmor.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "historico") 
+@Table(name = "historico")
 @Data
 public class Historico {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -24,12 +23,20 @@ public class Historico {
     @Column
     private String observacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+    @Column(name = "usuario_nome")
+    private String usuarioNome; 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medicamento_id", nullable = false)
-    private Medicamento medicamento;
+    @Column(name = "medicamento_nome")
+    private String medicamentoNome;
 
+    // --- NOVO CAMPO ---
+    @Column(name = "destinatario")
+    private String destinatario; // Nome do Paciente ou Pessoa Externa
+
+    @PrePersist
+    protected void onCreate() {
+        if (dataMovimentacao == null) {
+            dataMovimentacao = LocalDateTime.now();
+        }
+    }
 }

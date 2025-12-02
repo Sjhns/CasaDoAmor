@@ -1,6 +1,5 @@
 package com.casaDoAmor.CasaDoAmor.model;
 
-import com.casaDoAmor.CasaDoAmor.model.Medicamento;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

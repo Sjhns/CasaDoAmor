@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
+import { API_URL } from "../constants";
 
 interface ModalCadastroEstoqueProps {
     open: boolean;
     onClose: () => void;
+    defaultMedicamentoId?: string;
 }
 
 interface Medicamento {
@@ -25,6 +27,7 @@ interface FormEstoque {
 export default function ModalCadastroEstoque({
     open,
     onClose,
+    defaultMedicamentoId,
 }: ModalCadastroEstoqueProps) {
     const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
     const [form, setForm] = useState<FormEstoque>({
@@ -35,54 +38,169 @@ export default function ModalCadastroEstoque({
         validadeAposAberto: "",
     });
 
+    // NOVO: Adicionei a tipagem para validadeAposAberto nos erros
+    const [errors, setErrors] = useState<{
+        quantidade?: string;
+        validadeAposAberto?: string;
+    }>(() => ({}));
+    const [successMsg, setSuccessMsg] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // NOVO: Effect para validar a data sempre que o usuário altera o campo 'validadeAposAberto'
+    useEffect(() => {
+        if (form.validadeAposAberto) {
+            // Quebra a string "YYYY-MM-DD" para criar a data localmente e evitar bugs de timezone (UTC)
+            const [ano, mes, dia] = form.validadeAposAberto
+                .split("-")
+                .map(Number);
+            const dataValidade = new Date(ano, mes - 1, dia); // Mês em JS começa em 0
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0); // Zera horas, minutos, segundos para comparar apenas o dia
+
+            if (dataValidade < hoje) {
+                setErrors((prev) => ({
+                    ...prev,
+                    validadeAposAberto: "O remédio já está vencido.",
+                }));
+            } else {
+                setErrors((prev) => {
+                    const newErrs = { ...prev };
+                    delete newErrs.validadeAposAberto; // Remove o erro se a data for corrigida
+                    return newErrs;
+                });
+            }
+        } else {
+            // Limpa erro se o campo estiver vazio
+            setErrors((prev) => {
+                const newErrs = { ...prev };
+                delete newErrs.validadeAposAberto;
+                return newErrs;
+            });
+        }
+    }, [form.validadeAposAberto]);
+
     useEffect(() => {
         if (open) {
             fetch(
-                "http://localhost:8080/medicamento?page=1&per_page=50&sort_by=nome&sort_dir=asc"
+                `${API_URL}/medicamento?page=1&per_page=50&sort_by=nome&sort_dir=asc`
             )
                 .then((res) => res.json())
-                .then((data) => setMedicamentos(data.itens || []))
+                .then(async (data) => {
+                    const itens = data.itens || [];
+                    setMedicamentos(itens);
+                    if (defaultMedicamentoId) {
+                        setForm((prev) => ({
+                            ...prev,
+                            medicamentoId: defaultMedicamentoId,
+                        }));
+                        const exists = itens.some(
+                            (m: Medicamento) =>
+                                m.idMedicamento === defaultMedicamentoId
+                        );
+                        if (!exists) {
+                            try {
+                                const resp = await fetch(
+                                    `${API_URL}/medicamento/${defaultMedicamentoId}`
+                                );
+                                if (resp.ok) {
+                                    const med = await resp.json();
+                                    const mapped: Medicamento = {
+                                        idMedicamento: med.id,
+                                        nomeMedicamento: med.nome,
+                                        concentracao: med.concentracao,
+                                        estoqueMinimo: med.estoqueMinimo,
+                                        estoqueMaximo: med.estoqueMaximo,
+                                    };
+                                    setMedicamentos((prev) => [
+                                        mapped,
+                                        ...prev,
+                                    ]);
+                                }
+                            } catch (e) {
+                                console.warn(
+                                    "Não foi possível carregar o medicamento pré-selecionado",
+                                    e
+                                );
+                            }
+                        }
+                    }
+                })
                 .catch((err) => console.error(err));
         }
-    }, [open]);
+    }, [open, defaultMedicamentoId]);
+
+    useEffect(() => {
+        if (open && defaultMedicamentoId) {
+            setForm((prev) => ({
+                ...prev,
+                medicamentoId: defaultMedicamentoId,
+            }));
+        }
+    }, [defaultMedicamentoId, open]);
 
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value, type } = e.target as HTMLInputElement;
+        const parsedValue =
+            type === "number" ? (value === "" ? "" : Number(value)) : value;
+        setForm({ ...form, [name]: parsedValue } as FormEstoque);
     };
 
     const handleSubmit = () => {
+        if (isSubmitting) return; // evita múltiplos envios
+        // NOVO: Bloqueio extra no submit caso haja erro de data
+        if (errors.validadeAposAberto) return;
+
         const med = medicamentos.find(
             (m) => m.idMedicamento === form.medicamentoId
         );
         if (!med) return;
 
-        // Validação de quantidade mínima e máxima
         if (form.quantidade === "") {
-            alert("Informe a quantidade.");
+            setErrors((prev) => ({
+                ...prev,
+                quantidade: "Informe a quantidade.",
+            }));
             return;
         }
-
-        if (form.quantidade < med.estoqueMinimo) {
-            alert(
-                `Quantidade abaixo do mínimo permitido: ${med.estoqueMinimo}`
-            );
+        if (typeof form.quantidade === "number" && form.quantidade < 0) {
+            setErrors((prev) => ({
+                ...prev,
+                quantidade: "Quantidade não pode ser negativa.",
+            }));
             return;
         }
-
-        if (form.quantidade > med.estoqueMaximo) {
+        if (
+            typeof form.quantidade === "number" &&
+            form.quantidade > med.estoqueMaximo
+        ) {
             alert(`Quantidade acima do máximo permitido: ${med.estoqueMaximo}`);
             return;
         }
 
-        fetch("http://localhost:8080/estoque", {
+        // ... restante das validações
+
+        setIsSubmitting(true);
+        fetch(`${API_URL}/estoque`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(form),
         })
-            .then(() => onClose())
-            .catch((err) => console.error(err));
+            .then(() => {
+                setSuccessMsg("Estoque cadastrado com sucesso!");
+                setTimeout(() => {
+                    setSuccessMsg(null);
+                    onClose();
+                }, 1200);
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
     };
 
     if (!open) return null;
@@ -91,23 +209,33 @@ export default function ModalCadastroEstoque({
         (m) => m.idMedicamento === form.medicamentoId
     );
 
+    // NOVO: Verifica se existe algum erro bloqueante para desabilitar o botão
+    const hasBlockingErrors = !!errors.validadeAposAberto;
+
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-white p-6 w-full max-w-md rounded-lg shadow-xl animate-fadeIn">
-                <h2 className="text-xl font-semibold mb-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white p-6 w-full max-w-md rounded-xl shadow-2xl animate-fadeIn">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
                     Cadastrar Estoque
                 </h2>
 
-                <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">
+                {successMsg && (
+                    <div className="mb-3 rounded bg-green-50 text-green-700 px-3 py-2 text-sm">
+                        {successMsg}
+                    </div>
+                )}
+
+                <div className="flex flex-col gap-4">
+                    {/* ... (Select de Medicamento - sem alterações) ... */}
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
                             Medicamento
                         </label>
                         <select
                             name="medicamentoId"
                             value={form.medicamentoId}
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         >
                             <option value="">Selecione...</option>
                             {medicamentos.map((m) => (
@@ -134,45 +262,71 @@ export default function ModalCadastroEstoque({
                         </div>
                     )}
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">
+                    {/* ... (Input Quantidade - sem alterações) ... */}
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
                             Quantidade
                         </label>
                         <input
                             type="number"
                             name="quantidade"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            disabled={isSubmitting}
+                            className={`px-4 py-2.5 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.quantidade ? "border-red-500" : "border-gray-300"}`}
                         />
+                        {errors.quantidade && (
+                            <span className="text-xs text-red-600 mt-1">
+                                {errors.quantidade}
+                            </span>
+                        )}
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">Status</label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
+                            Status
+                        </label>
                         <input
                             name="status"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            disabled={isSubmitting}
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">Lote</label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
+                            Lote
+                        </label>
                         <input
                             name="lote"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            disabled={isSubmitting}
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <label className="font-medium text-sm">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-sm text-gray-700">
                             Validade Após Aberto
                         </label>
+                        {/* NOVO: Exibe mensagem de erro acima do campo se existir */}
+                        {errors.validadeAposAberto && (
+                            <span className="text-xs font-bold text-red-600 mb-1 animate-pulse">
+                                {errors.validadeAposAberto}
+                            </span>
+                        )}
                         <input
                             type="date"
                             name="validadeAposAberto"
                             onChange={handleChange}
-                            className="border rounded p-2 focus:ring focus:ring-blue-300"
+                            disabled={isSubmitting}
+                            // NOVO: Adicionei borda vermelha condicional também
+                            className={`px-4 py-2.5 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 transition-all 
+                                ${
+                                    errors.validadeAposAberto
+                                        ? "border-red-500 focus:ring-red-500"
+                                        : "border-gray-300 focus:ring-blue-500 focus:border-transparent"
+                                }`}
                         />
                     </div>
 
@@ -184,10 +338,17 @@ export default function ModalCadastroEstoque({
                             Cancelar
                         </button>
                         <button
-                            className="px-6 py-2.5 rounded-lg font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            // NOVO: Propriedade disabled e classes de estilo para estado desabilitado
+                            disabled={hasBlockingErrors || isSubmitting}
+                            className={`px-6 py-2.5 rounded-lg font-medium text-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                                ${
+                                    hasBlockingErrors || isSubmitting
+                                        ? "bg-gray-400 cursor-not-allowed opacity-70"
+                                        : "bg-blue-600 hover:bg-blue-700"
+                                }`}
                             onClick={handleSubmit}
                         >
-                            Cadastrar
+                            {isSubmitting ? "Cadastrando..." : "Cadastrar"}
                         </button>
                     </div>
                 </div>

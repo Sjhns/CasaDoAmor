@@ -1,4 +1,5 @@
 package com.casaDoAmor.CasaDoAmor.dtoAtualizar;
+
 import lombok.Getter;
 import lombok.Setter;
 import java.util.UUID;
@@ -25,4 +26,7 @@ public class MedicamentoDTOAtualizar {
     private Long estoqueMinimo;
     @NotNull
     private Long estoqueMaximo;
+    // Permitir atualização da denominação genérica
+    @NotNull
+    private UUID denominacaoGenericaId;
 }

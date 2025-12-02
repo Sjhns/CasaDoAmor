@@ -29,30 +29,17 @@ public class HistoricoController {
 
     @GetMapping
     public ResponseEntity<Page<HistoricoResponseDTO>> getHistorico(
-            
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) 
-            LocalDateTime dataInicio,
-            
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) 
-            LocalDateTime dataFim,
-            
-            @RequestParam(required = false) 
-            UUID usuarioId,
-            
-            @RequestParam(required = false) 
-            UUID medicamentoId,
-            
-            @RequestParam(required = false) 
-            String tipo,
-
-            @PageableDefault(size = 20, sort = "dataMovimentacao", direction = Sort.Direction.DESC) 
-            Pageable pageable
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim,
+            @RequestParam(required = false) String usuario, // Mudou de UUID para String
+            @RequestParam(required = false) String medicamento, // Mudou de UUID para String
+            @RequestParam(required = false) String tipo,
+            @PageableDefault(size = 20, sort = "dataMovimentacao", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        
+        // Passando os parâmetros atualizados
         Page<HistoricoResponseDTO> pagina = historicoService.buscarHistorico(
-            dataInicio, dataFim, usuarioId, medicamentoId, tipo, pageable
+            dataInicio, dataFim, usuario, medicamento, tipo, pageable
         );
-        
         return ResponseEntity.ok(pagina);
     }
 }

@@ -13,6 +13,9 @@ public class Notificacao {
 
     private String tipoAlerta;
     private String mensagem;
+    private String nomeMedicamento;
+    private LocalDateTime dataVencimento;
+    private Integer quantidade;
     private LocalDateTime dataCriacao;
 
     @Column(columnDefinition = "boolean default false")

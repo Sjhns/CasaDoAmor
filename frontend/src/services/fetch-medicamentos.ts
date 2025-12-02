@@ -1,6 +1,5 @@
 import { API_URL } from "../constants";
 
-// parametros pro hook
 export interface FetchMedicamentosParams {
     page: number;
     per_page: number;
@@ -9,25 +8,39 @@ export interface FetchMedicamentosParams {
     sort_dir?: "asc" | "desc";
 }
 
-// resposta da api
+// RESPOSTA DA API COMPLETA
 export interface MedicamentoResponse {
+    idMedicamento: string;
+    nomeMedicamento: string;
+    quantidadeTotalEstoque: number;
+    lote?: string | null;
+    validade?: string | null;
+    
+    // Detalhes técnicos
     formaFarmaceutica: string;
     concentracao: string;
     viaDeAdministracao: string;
     categoriaTerapeutica: string;
-    idMedicamento: string;
-    nomeMedicamento: string;
-    lote?: string | null;
-    validade?: string | null;
-}
+    
+    // --- CAMPOS ADICIONADOS PARA CORRIGIR O ERRO ---
+    laboratorioFabricante?: string | null; // <--- Esse é o culpado do erro atual
+    estoqueMinimo?: number | null;
+    estoqueMaximo?: number | null;
 
-// info para paginacao
+    // Lista de estoques para o accordion
+    estoques?: {
+        id: string;
+        lote: string;
+        quantidade: number;
+        validadeAposAberto: string;
+        status: string;
+    }[];
+}
 
 export interface PaginatedMedicamentosResponse {
     itens: MedicamentoResponse[];
     paginaAtual: number;
     quantidadeItensSolicitados: number;
-
     totalRegistrosEncontrados: number;
 }
 
@@ -53,8 +66,6 @@ export const fetchMedicamentos = async ({
     if (sort_dir) {
         params.append("sort_dir", sort_dir);
     }
-
-    // se o page for zero ou negativo, deve corrigir para 1
 
     const response = await fetch(`${API_URL}/medicamento?${params.toString()}`);
 

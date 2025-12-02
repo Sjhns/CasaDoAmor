@@ -1,40 +1,48 @@
 package com.casaDoAmor.CasaDoAmor.dtoListar;
-import com.casaDoAmor.CasaDoAmor.model.Medicamento;
-import lombok.Data;
-import java.util.UUID;
+
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-@Data
-public class MedicamentoDTOListar {
-    private UUID id;
-    private String nome;
-    private String concentracao;
-    private String laboratorioFabricante;
-    private Long estoqueMinimo;
-    private Long estoqueMaximo;
-    private List<EstoqueDTOListar> estoques; 
-    private DenominacaoGenericaDTOListar denominacaoGenerica;
+
+import com.casaDoAmor.CasaDoAmor.model.Medicamento;
+
+public record MedicamentoDTOListar(
+    UUID idMedicamento,
+    String nomeMedicamento,
+    Long quantidadeTotalEstoque,
+    String lote, 
+    LocalDate validade, 
+    String formaFarmaceutica,
+    String categoriaTerapeutica,
+    
+    // --- ESTE É O CAMPO QUE FALTAVA NA TABELA ---
+    List<EstoqueDTOListar> estoques 
+) {
     public static MedicamentoDTOListar fromEntity(Medicamento medicamento) {
-        MedicamentoDTOListar dto = new MedicamentoDTOListar();
-        dto.setId(medicamento.getId());
-        dto.setNome(medicamento.getNome());
-        dto.setConcentracao(medicamento.getConcentracao());
-        dto.setLaboratorioFabricante(medicamento.getLaboratorioFabricante());
-        dto.setEstoqueMinimo(medicamento.getEstoqueMinimo());
-        dto.setEstoqueMaximo(medicamento.getEstoqueMaximo());
-        if (medicamento.getEstoques() != null) {
-            dto.setEstoques(
-                medicamento.getEstoques().stream()
-                    .map(EstoqueDTOListar::fromEntity)
-                    .collect(Collectors.toList())
-            );
-        }
-        if (medicamento.getDenominacaoGenerica() != null) {
-            dto.setDenominacaoGenerica(
-                DenominacaoGenericaDTOListar.fromEntity(medicamento.getDenominacaoGenerica())
-            );
-        }
-        
-        return dto;
+        // 1. Calcula o Total
+        Long total = medicamento.getEstoques().stream()
+                .mapToLong(e -> e.getQuantidade())
+                .sum();
+
+        // 2. Define dados de resumo (para a linha fechada)
+        String lotePrincipal = medicamento.getEstoques().isEmpty() ? "-" : medicamento.getEstoques().get(0).getLote();
+        LocalDate validadePrincipal = medicamento.getEstoques().isEmpty() ? null : medicamento.getEstoques().get(0).getValidadeAposAberto();
+
+        // 3. Preenche a lista detalhada (para o Accordion abrir)
+        List<EstoqueDTOListar> listaEstoques = medicamento.getEstoques().stream()
+                .map(EstoqueDTOListar::fromEntity)
+                .collect(Collectors.toList());
+
+        return new MedicamentoDTOListar(
+            medicamento.getId(),
+            medicamento.getNome(),
+            total,
+            lotePrincipal,
+            validadePrincipal,
+            medicamento.getFormaFarmaceutica(),
+            medicamento.getCategoriaTerapeutica(),
+            listaEstoques // <--- Agora a tabela vai receber os dados!
+        );
     }
 }
