@@ -100,15 +100,25 @@ public class NotificacaoService {
                 LocalDate dataVencimento = estoque.getValidadeAposAberto();
 
                 if (dataVencimento.isBefore(hoje)) {
-                    boolean jaNotificado = notificacaoRepo
-                            .findByLidaFalseOrderByDataCriacaoDesc()
-                            .stream()
-                            .anyMatch(n -> n.getTipoAlerta().equals("VENCIDO")
-                                    && n.getNomeMedicamento().equals(estoque.getMedicamento().getNome())
-                                    && n.getDataVencimento() != null
-                                    && n.getDataVencimento().toLocalDate().equals(dataVencimento));
+                    // Política de repetição: única até ser lida; se lida, reenviar após 7 dias se
+                    // persistir
+                    Notificacao ultima = notificacaoRepo
+                            .findTopByTipoAlertaAndNomeMedicamentoAndDataVencimentoOrderByDataCriacaoDesc(
+                                    "VENCIDO",
+                                    estoque.getMedicamento().getNome(),
+                                    dataVencimento.atStartOfDay());
 
-                    if (!jaNotificado) {
+                    boolean deveCriar = false;
+                    if (ultima == null) {
+                        deveCriar = true;
+                    } else if (!ultima.isLida()) {
+                        deveCriar = false; // ainda não lida: não duplicar
+                    } else {
+                        // Lida: permitir novo alerta somente após 7 dias
+                        deveCriar = ultima.getDataCriacao().isBefore(LocalDateTime.now().minusDays(7));
+                    }
+
+                    if (deveCriar) {
                         criarNotificacao(
                                 "VENCIDO",
                                 "Medicamento vencido: " + estoque.getMedicamento().getNome() +
@@ -148,15 +158,25 @@ public class NotificacaoService {
                 LocalDate dataVencimento = estoque.getValidadeAposAberto();
 
                 if (dataVencimento.isAfter(hoje) && dataVencimento.isBefore(limite)) {
-                    boolean jaNotificado = notificacaoRepo
-                            .findByLidaFalseOrderByDataCriacaoDesc()
-                            .stream()
-                            .anyMatch(n -> n.getTipoAlerta().equals("PROXIMO_VENCIMENTO")
-                                    && n.getNomeMedicamento().equals(estoque.getMedicamento().getNome())
-                                    && n.getDataVencimento() != null
-                                    && n.getDataVencimento().toLocalDate().equals(dataVencimento));
+                    // Política de repetição: única até ser lida; se lida, reenviar após 7 dias se
+                    // persistir
+                    Notificacao ultima = notificacaoRepo
+                            .findTopByTipoAlertaAndNomeMedicamentoAndDataVencimentoOrderByDataCriacaoDesc(
+                                    "PROXIMO_VENCIMENTO",
+                                    estoque.getMedicamento().getNome(),
+                                    dataVencimento.atStartOfDay());
 
-                    if (!jaNotificado) {
+                    boolean deveCriar = false;
+                    if (ultima == null) {
+                        deveCriar = true;
+                    } else if (!ultima.isLida()) {
+                        deveCriar = false; // ainda não lida: não duplicar
+                    } else {
+                        // Lida: permitir novo alerta somente após 7 dias
+                        deveCriar = ultima.getDataCriacao().isBefore(LocalDateTime.now().minusDays(7));
+                    }
+
+                    if (deveCriar) {
                         long diasRestantes = java.time.temporal.ChronoUnit.DAYS.between(hoje, dataVencimento);
 
                         criarNotificacao(
