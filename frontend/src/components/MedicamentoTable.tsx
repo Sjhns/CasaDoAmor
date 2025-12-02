@@ -12,6 +12,7 @@ interface MedicamentosTableProps {
     searchTerm?: string;
     itemsPerPage?: number;
     onEdit?: (id: string) => void;
+    onDispatch?: (id: string) => void;
 }
 
 const TABLE_HEAD = [
@@ -41,6 +42,7 @@ export const MedicamentosTable = ({
     searchTerm = "",
     itemsPerPage = 5,
     onEdit,
+    onDispatch,
 }: MedicamentosTableProps) => {
     // 1. Estado e Hook (Integração)
     const [page, setPage] = useState(1);
@@ -76,15 +78,15 @@ export const MedicamentosTable = ({
 
     // integrar com modal de despacho
     const handleDispatch = (id: string) => {
-        console.log("Despachar medicamento:", id);
+        if (onDispatch) {
+            onDispatch(id);
+        }
     };
 
     // integrar com modal de edicao
     const handleEdit = (id: string) => {
         if (onEdit) {
             onEdit(id);
-        } else {
-            console.log("Editar medicamento:", id);
         }
     };
 

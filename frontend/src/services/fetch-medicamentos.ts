@@ -9,26 +9,33 @@ export interface FetchMedicamentosParams {
     sort_dir?: "asc" | "desc";
 }
 
-// resposta da api
+// RESPOSTA DA API (Atualizada com a lista de estoques)
 export interface MedicamentoResponse {
+    idMedicamento: string;
+    nomeMedicamento: string;
+    quantidadeTotalEstoque: number; // ou optional, dependendo do back
+    lote?: string | null;
+    validade?: string | null;
     formaFarmaceutica: string;
     concentracao: string;
     viaDeAdministracao: string;
     categoriaTerapeutica: string;
-    idMedicamento: string;
-    nomeMedicamento: string;
-    lote?: string | null;
-    validade?: string | null;
-    quantidadeTotalEstoque?: number;
+
+    // --- NOVO CAMPO: Lista de Estoques para o Accordion ---
+    estoques?: {
+        id: string;
+        lote: string;
+        quantidade: number;
+        validadeAposAberto: string; // O Java manda LocalDate, aqui chega string "yyyy-mm-dd"
+        status: string;
+    }[];
 }
 
 // info para paginacao
-
 export interface PaginatedMedicamentosResponse {
     itens: MedicamentoResponse[];
     paginaAtual: number;
     quantidadeItensSolicitados: number;
-
     totalRegistrosEncontrados: number;
 }
 
@@ -54,8 +61,6 @@ export const fetchMedicamentos = async ({
     if (sort_dir) {
         params.append("sort_dir", sort_dir);
     }
-
-    // se o page for zero ou negativo, deve corrigir para 1
 
     const response = await fetch(`${API_URL}/medicamento?${params.toString()}`);
 

@@ -1,18 +1,24 @@
+import { useState } from "react";
 import {
     Pencil,
     AlertTriangle,
     X,
     CheckCircle,
     ArrowRight,
+    ChevronDown,
+    ChevronRight,
+    Package
 } from "lucide-react";
 import { getStatusByDate } from "../utils";
+// Importamos o tipo oficial que JÁ TEM a lista de estoques agora
 import type { MedicamentoResponse } from "../services/fetch-medicamentos";
 
 interface MedicineRowProps {
-    medicamento: MedicamentoResponse;
+    medicamento: MedicamentoResponse; // <--- Usamos direto o tipo oficial
     onEdit: (id: string) => void;
     onDispatch?: (id: string) => void;
     isLast: boolean;
+    lastRowClass?: string;
 }
 
 export const MedicineRow = ({
@@ -20,128 +26,215 @@ export const MedicineRow = ({
     onEdit,
     onDispatch,
     isLast,
-}: MedicineRowProps & { lastRowClass?: string }) => {
-    const status = getStatusByDate(medicamento.validade || "");
+}: MedicineRowProps) => {
+    // --- DEBUG: Mantenha isso até o accordion funcionar ---
+    console.log(`Linha: ${medicamento.nomeMedicamento}`, {
+        estoques: medicamento.estoques
+    });
+    // ----------------------------------------------------
 
-    const tdClass = (extra: string = "") =>
-        isLast
-            ? `p-2 text-xs sm:p-4 sm:text-sm ${extra} min-w-[90px]`
-            : `p-2 text-xs sm:p-4 sm:text-sm border-b border-blue-gray-50 ${extra} min-w-[90px]`;
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const rawDate = medicamento.validade;
+    const isValidDate = rawDate && !isNaN(new Date(rawDate).getTime());
+    const hasStock = (medicamento.quantidadeTotalEstoque || 0) > 0;
+    const status = (hasStock && isValidDate) ? getStatusByDate(rawDate) : "indisponivel";
+
+    // Verifica se tem estoques na lista oficial
+    const lotesCount = medicamento.estoques?.length || 0;
+    const hasMultipleBatches = lotesCount > 1;
+
+    const tdClass = (extra: string = "") => {
+        const baseClasses = `p-2 text-xs sm:p-4 sm:text-sm ${extra} min-w-[90px]`;
+        return isLast 
+            ? baseClasses 
+            : `${baseClasses} border-b border-blue-gray-50`;
+    };
+
     const expired = status === "vencido";
 
     let StatusIcon = CheckCircle;
+    let statusColorClass = "bg-green-50 text-green-700";
 
     if (status === "atencao") {
         StatusIcon = AlertTriangle;
+        statusColorClass = "bg-amber-50 text-amber-700";
     } else if (status === "vencido") {
         StatusIcon = X;
+        statusColorClass = "bg-red-600 text-white";
+    } else if (!hasStock) {
+        StatusIcon = Package;
+        statusColorClass = "bg-gray-100 text-gray-500";
     }
 
+    const formatDate = (dateString?: string | null) => {
+        if (!dateString) return "-";
+        return new Date(dateString).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            timeZone: "UTC",
+        });
+    };
+
+    const handleRowClick = () => {
+        if (hasMultipleBatches) {
+            setIsExpanded(!isExpanded);
+        }
+    };
+
     return (
-        <tr
-            className={`${expired ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50"} transition-colors`}
-        >
-            <td className={tdClass()}>
-                <div className="flex flex-col">
-                    <span
-                        className={`text-sm font-normal opacity-70 ${expired ? "text-red-700" : "text-gray-600"}`}
-                    >
-                        #{medicamento.idMedicamento.substring(0, 6)}
+        <>
+            <tr
+                className={`transition-colors ${
+                    hasMultipleBatches ? "cursor-pointer" : ""
+                } ${
+                    isExpanded ? "bg-blue-50/50" : expired ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50"
+                }`}
+                onClick={handleRowClick}
+            >
+                {/* ID e Chevron */}
+                <td className={tdClass()}>
+                    <div className="flex items-center gap-2">
+                        {hasMultipleBatches && (
+                            <button 
+                                className="p-1 rounded-full hover:bg-gray-200 text-gray-500 transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRowClick();
+                                }}
+                            >
+                                {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                            </button>
+                        )}
+                        {!hasMultipleBatches && <div className="w-6" />} 
+                        
+                        <span className={`text-sm font-normal opacity-70 ${expired ? "text-red-700" : "text-gray-600"}`}>
+                            #{medicamento.idMedicamento.substring(0, 6)}
+                        </span>
+                    </div>
+                </td>
+
+                <td className={tdClass()}>
+                    <span className={`text-sm font-bold ${expired ? "text-red-800" : "text-gray-900"}`}>
+                        {medicamento.nomeMedicamento}
                     </span>
-                </div>
-            </td>
+                    {hasMultipleBatches && (
+                        <span className="ml-2 text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                            {lotesCount} lotes
+                        </span>
+                    )}
+                </td>
 
-            <td className={tdClass()}>
-                <span
-                    className={`text-sm font-bold ${expired ? "text-red-800" : "text-gray-900"}`}
-                >
-                    {medicamento.nomeMedicamento}
-                </span>
-            </td>
-
-            <td className={tdClass("text-center")}>
-                <span
-                    className={`text-sm font-semibold ${expired ? "text-red-800" : "text-gray-900"}`}
-                >
-                    {medicamento.quantidadeTotalEstoque ?? 0}
-                </span>
-            </td>
-
-            <td className={tdClass()}>
-                <span
-                    className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}
-                >
-                    {medicamento.lote}
-                </span>
-            </td>
-
-            <td className={tdClass()}>
-                <span
-                    className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}
-                >
-                    {medicamento.formaFarmaceutica}
-                </span>
-            </td>
-
-            <td className={tdClass()}>
-                <div className="w-max">
-                    <span
-                        className={`inline-flex items-center gap-2 px-2 py-1 rounded text-sm ${
-                            status === "vencido"
-                                ? "bg-red-600 text-white"
-                                : status === "atencao"
-                                  ? "bg-amber-50 text-amber-700"
-                                  : "bg-green-50 text-green-700"
-                        }`}
-                    >
-                        <StatusIcon className="mt-0.5 h-4 w-4" />
-                        {new Date(
-                            medicamento.validade || ""
-                        ).toLocaleDateString("pt-BR", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            timeZone: "UTC",
-                        })}
+                <td className={tdClass("text-center")}>
+                    <span className={`text-sm font-semibold ${expired ? "text-red-800" : "text-gray-900"}`}>
+                        {medicamento.quantidadeTotalEstoque ?? 0}
                     </span>
-                </div>
-            </td>
+                </td>
 
-            <td className={tdClass()}>
-                <span
-                    className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}
-                >
-                    {medicamento.categoriaTerapeutica}
-                </span>
-            </td>
+                <td className={tdClass()}>
+                    <span className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}>
+                        {hasMultipleBatches 
+                            ? "Múltiplos..." 
+                            : medicamento.lote || "-"}
+                    </span>
+                </td>
 
-            {/* Coluna Despacho */}
-            <td className={tdClass()}>
-                <div className="flex items-center justify-center">
-                    <button
-                        title="Despachar (saída de estoque)"
-                        onClick={() =>
-                            onDispatch && onDispatch(medicamento.idMedicamento)
-                        }
-                        className={`p-2 rounded hover:bg-gray-100 ${expired ? "text-red-700" : "text-gray-700"}`}
-                    >
-                        <ArrowRight className="h-4 w-4" />
-                    </button>
-                </div>
-            </td>
+                <td className={tdClass()}>
+                    <span className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}>
+                        {medicamento.formaFarmaceutica}
+                    </span>
+                </td>
 
-            {/* Coluna Edição */}
-            <td className={tdClass()}>
-                <div className="flex items-center justify-center">
-                    <button
-                        title="Editar Medicamento"
-                        onClick={() => onEdit(medicamento.idMedicamento)}
-                        className={`p-2 rounded hover:bg-gray-100 ${expired ? "text-red-700" : "text-gray-700"}`}
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </button>
-                </div>
-            </td>
-        </tr>
+                <td className={tdClass()}>
+                    <div className="w-max">
+                        <span className={`inline-flex items-center gap-2 px-2 py-1 rounded text-sm ${statusColorClass}`}>
+                            <StatusIcon className="mt-0.5 h-4 w-4" />
+                            {hasStock && isValidDate ? formatDate(rawDate) : "Esgotado"}
+                        </span>
+                    </div>
+                </td>
+
+                <td className={tdClass()}>
+                    <span className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}>
+                        {medicamento.categoriaTerapeutica}
+                    </span>
+                </td>
+
+                <td className={tdClass()}>
+                    <div className="flex items-center justify-center gap-1">
+                        <button
+                            title="Despachar (saída)"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (onDispatch) onDispatch(medicamento.idMedicamento);
+                            }}
+                            className="p-2 rounded hover:bg-blue-100 text-blue-600 transition-colors"
+                        >
+                            <ArrowRight className="h-4 w-4" />
+                        </button>
+                    </div>
+                </td>
+
+                <td className={tdClass()}>
+                    <div className="flex items-center justify-center">
+                        <button
+                            title="Editar"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(medicamento.idMedicamento);
+                            }}
+                            className="p-2 rounded hover:bg-gray-200 text-gray-700 transition-colors"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+
+            {/* ACCORDION */}
+            {hasMultipleBatches && isExpanded && (
+                <tr className="bg-gray-50/80 animate-fadeIn">
+                    <td colSpan={9} className="p-4 border-b border-gray-200 shadow-inner">
+                        <div className="ml-8 pl-4 border-l-2 border-blue-200">
+                            <h4 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider">
+                                Detalhamento de Estoque por Lote
+                            </h4>
+                            
+                            <table className="w-full max-w-2xl text-sm text-left">
+                                <thead>
+                                    <tr className="text-gray-500 border-b border-gray-200">
+                                        <th className="pb-2 font-medium">Lote</th>
+                                        <th className="pb-2 font-medium">Validade</th>
+                                        <th className="pb-2 font-medium">Quantidade</th>
+                                        <th className="pb-2 font-medium">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {medicamento.estoques?.map((est, idx) => {
+                                        // O Java manda 'validadeAposAberto', o front converte para string
+                                        const dataValidade = est.validadeAposAberto || ""; 
+                                        const statusLote = dataValidade ? getStatusByDate(dataValidade) : "ok";
+                                        
+                                        return (
+                                            <tr key={est.id || idx} className="hover:bg-gray-100">
+                                                <td className="py-2 font-medium text-gray-800">{est.lote}</td>
+                                                <td className="py-2 text-gray-600">{formatDate(dataValidade)}</td>
+                                                <td className="py-2 font-bold text-gray-800">{est.quantidade} un</td>
+                                                <td className="py-2">
+                                                    {statusLote === "vencido" && <span className="text-xs text-red-600 font-bold">Vencido</span>}
+                                                    {statusLote === "atencao" && <span className="text-xs text-amber-600 font-bold">Vence em breve</span>}
+                                                    {statusLote === "ok" && <span className="text-xs text-green-600">OK</span>}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            )}
+        </>
     );
 };
