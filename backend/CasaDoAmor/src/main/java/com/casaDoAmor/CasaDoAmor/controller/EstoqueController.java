@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.casaDoAmor.CasaDoAmor.dtoCriar.EstoqueDTOCriar;
+import com.casaDoAmor.CasaDoAmor.dtoCriar.DespachoDTOCriar;
 import com.casaDoAmor.CasaDoAmor.dtoListar.EstoqueDTOListar;
 import com.casaDoAmor.CasaDoAmor.dtoResposta.EstoqueDTOResposta;
 import com.casaDoAmor.CasaDoAmor.model.Estoque;
@@ -22,6 +23,15 @@ public class EstoqueController {
     public EstoqueController(EstoqueService estoqueService) {
         this.estoqueService = estoqueService;
     }
+
+    // --- SEU NOVO ENDPOINT AQUI ---
+    @PostMapping("/despacho")
+    public ResponseEntity<Void> realizarDespacho(@RequestBody DespachoDTOCriar dados) {
+        // Você vai precisar criar esse método 'realizarDespacho' no seu Service também!
+        estoqueService.realizarDespacho(dados);
+        return ResponseEntity.ok().build();
+    }
+    // -----------------------------
 
     @PostMapping
     public ResponseEntity<EstoqueDTOResposta> salvar(@Valid @RequestBody EstoqueDTOCriar dto) {

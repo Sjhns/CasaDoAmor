@@ -1,23 +1,23 @@
 package com.casaDoAmor.CasaDoAmor.dtoListar;
 
-import lombok.Getter;
-import lombok.Setter;
-
+import java.time.LocalDate;
 import java.util.UUID;
+import com.casaDoAmor.CasaDoAmor.model.Estoque;
 
-@Getter
-@Setter
-public class EstoqueDTOListar {
-    private UUID id;
-    private Long quantidade;
-    private String status;
-    private String lote;
-    public static EstoqueDTOListar fromEntity(com.casaDoAmor.CasaDoAmor.model.Estoque estoque) {
-        EstoqueDTOListar dto = new EstoqueDTOListar();
-        dto.setId(estoque.getId());
-        dto.setQuantidade(estoque.getQuantidade());
-        dto.setStatus(estoque.getStatus());
-        dto.setLote(estoque.getLote());
-        return dto;
+public record EstoqueDTOListar(
+    UUID id,
+    String lote,
+    Long quantidade,
+    LocalDate validadeAposAberto,
+    String status
+) {
+    public static EstoqueDTOListar fromEntity(Estoque estoque) {
+        return new EstoqueDTOListar(
+            estoque.getId(),
+            estoque.getLote(),
+            estoque.getQuantidade(),
+            estoque.getValidadeAposAberto(),
+            estoque.getStatus()
+        );
     }
 }
