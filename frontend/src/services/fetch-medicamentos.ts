@@ -1,6 +1,5 @@
 import { API_URL } from "../constants";
 
-// parametros pro hook
 export interface FetchMedicamentosParams {
     page: number;
     per_page: number;
@@ -9,29 +8,35 @@ export interface FetchMedicamentosParams {
     sort_dir?: "asc" | "desc";
 }
 
-// RESPOSTA DA API (Atualizada com a lista de estoques)
+// RESPOSTA DA API COMPLETA
 export interface MedicamentoResponse {
     idMedicamento: string;
     nomeMedicamento: string;
-    quantidadeTotalEstoque: number; // ou optional, dependendo do back
+    quantidadeTotalEstoque: number;
     lote?: string | null;
     validade?: string | null;
+    
+    // Detalhes técnicos
     formaFarmaceutica: string;
     concentracao: string;
     viaDeAdministracao: string;
     categoriaTerapeutica: string;
+    
+    // --- CAMPOS ADICIONADOS PARA CORRIGIR O ERRO ---
+    laboratorioFabricante?: string | null; // <--- Esse é o culpado do erro atual
+    estoqueMinimo?: number | null;
+    estoqueMaximo?: number | null;
 
-    // --- NOVO CAMPO: Lista de Estoques para o Accordion ---
+    // Lista de estoques para o accordion
     estoques?: {
         id: string;
         lote: string;
         quantidade: number;
-        validadeAposAberto: string; // O Java manda LocalDate, aqui chega string "yyyy-mm-dd"
+        validadeAposAberto: string;
         status: string;
     }[];
 }
 
-// info para paginacao
 export interface PaginatedMedicamentosResponse {
     itens: MedicamentoResponse[];
     paginaAtual: number;
