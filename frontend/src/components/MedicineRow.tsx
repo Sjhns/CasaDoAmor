@@ -10,11 +10,10 @@ import {
     Package
 } from "lucide-react";
 import { getStatusByDate } from "../utils";
-// Importamos o tipo oficial que JÁ TEM a lista de estoques agora
 import type { MedicamentoResponse } from "../services/fetch-medicamentos";
 
 interface MedicineRowProps {
-    medicamento: MedicamentoResponse; // <--- Usamos direto o tipo oficial
+    medicamento: MedicamentoResponse;
     onEdit: (id: string) => void;
     onDispatch?: (id: string) => void;
     isLast: boolean;
@@ -27,12 +26,6 @@ export const MedicineRow = ({
     onDispatch,
     isLast,
 }: MedicineRowProps) => {
-    // --- DEBUG: Mantenha isso até o accordion funcionar ---
-    console.log(`Linha: ${medicamento.nomeMedicamento}`, {
-        estoques: medicamento.estoques
-    });
-    // ----------------------------------------------------
-
     const [isExpanded, setIsExpanded] = useState(false);
 
     const rawDate = medicamento.validade;
@@ -40,12 +33,11 @@ export const MedicineRow = ({
     const hasStock = (medicamento.quantidadeTotalEstoque || 0) > 0;
     const status = (hasStock && isValidDate) ? getStatusByDate(rawDate) : "indisponivel";
 
-    // Verifica se tem estoques na lista oficial
     const lotesCount = medicamento.estoques?.length || 0;
     const hasMultipleBatches = lotesCount > 1;
 
     const tdClass = (extra: string = "") => {
-        const baseClasses = `p-2 text-xs sm:p-4 sm:text-sm ${extra} min-w-[90px]`;
+        const baseClasses = `p-2 text-xs sm:p-4 sm:text-sm ${extra} min-w-[90px] align-middle`;
         return isLast 
             ? baseClasses 
             : `${baseClasses} border-b border-blue-gray-50`;
@@ -115,15 +107,19 @@ export const MedicineRow = ({
                     </div>
                 </td>
 
+                {/* Nome e Tag de Lotes */}
                 <td className={tdClass()}>
-                    <span className={`text-sm font-bold ${expired ? "text-red-800" : "text-gray-900"}`}>
-                        {medicamento.nomeMedicamento}
-                    </span>
-                    {hasMultipleBatches && (
-                        <span className="ml-2 text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full">
-                            {lotesCount} lotes
+                    <div className="flex flex-col items-start gap-1">
+                        <span className={`text-sm font-bold ${expired ? "text-red-800" : "text-gray-900"}`}>
+                            {medicamento.nomeMedicamento}
                         </span>
-                    )}
+                        
+                        {hasMultipleBatches && (
+                            <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                                {lotesCount} lotes
+                            </span>
+                        )}
+                    </div>
                 </td>
 
                 <td className={tdClass("text-center")}>
@@ -212,7 +208,6 @@ export const MedicineRow = ({
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     {medicamento.estoques?.map((est, idx) => {
-                                        // O Java manda 'validadeAposAberto', o front converte para string
                                         const dataValidade = est.validadeAposAberto || ""; 
                                         const statusLote = dataValidade ? getStatusByDate(dataValidade) : "ok";
                                         

@@ -6,4 +6,5 @@ export interface Operation {
   user: string;
   level: string;
   obs: string;
+  recipient?: string;
 }

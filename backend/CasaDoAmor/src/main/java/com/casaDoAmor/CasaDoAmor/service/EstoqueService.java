@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.casaDoAmor.CasaDoAmor.dtoCriar.DespachoDTOCriar;
 import com.casaDoAmor.CasaDoAmor.dtoCriar.EstoqueDTOCriar;
@@ -19,20 +20,22 @@ import com.casaDoAmor.CasaDoAmor.repository.MedicamentoRepository;
 public class EstoqueService {
     private final EstoqueRepository estoqueRepository;
     private final MedicamentoRepository medicamentoRepository;
+    private final HistoricoService historicoService;
 
-    public EstoqueService(EstoqueRepository estoqueRepository, MedicamentoRepository medicamentoRepository) {
+    public EstoqueService(EstoqueRepository estoqueRepository, 
+                          MedicamentoRepository medicamentoRepository,
+                          HistoricoService historicoService) {
         this.estoqueRepository = estoqueRepository;
         this.medicamentoRepository = medicamentoRepository;
+        this.historicoService = historicoService;
     }
 
-    // --- CORREÇÃO DE INCONSISTENCIAS (ADIÇÃO SEGURA) ---
     @Transactional
     public Estoque salvar(EstoqueDTOCriar dto) { 
         UUID medicamentoId = dto.getMedicamentoId();
         Medicamento medicamento = medicamentoRepository.findById(medicamentoId)
              .orElseThrow(() -> new RuntimeException("Medicamento não encontrado com ID: " + medicamentoId));
         
-        // 1. Validar Teto Máximo
         long saldoAtualTotal = medicamento.getEstoques().stream()
             .mapToLong(Estoque::getQuantidade)
             .sum();
@@ -41,40 +44,48 @@ public class EstoqueService {
         long estoqueMaximo = medicamento.getEstoqueMaximo();
         
         if (novoSaldoTotal > estoqueMaximo) {
-            throw new RuntimeException("ENTRADA INVÁLIDA: O estoque total (" + novoSaldoTotal + ") ultrapassa o limite máximo (" + estoqueMaximo + ").");
+            throw new RuntimeException("ENTRADA INVÁLIDA: O estoque total ultrapassa o limite máximo.");
         }
 
-        // 2. Lógica de Agrupamento Específico:
-        // Só soma se for EXATAMENTE o mesmo Lote E a mesma Validade.
-        // Caso contrário, cria uma linha separada.
-        Optional<Estoque> estoqueIdentico = medicamento.getEstoques().stream()
+        Optional<Estoque> loteExistente = medicamento.getEstoques().stream()
             .filter(e -> 
                 e.getLote().equalsIgnoreCase(dto.getLote()) && 
-                ( // Compara datas lidando com nulos
+                (
                     (e.getValidadeAposAberto() == null && dto.getValidadeAposAberto() == null) ||
                     (e.getValidadeAposAberto() != null && e.getValidadeAposAberto().equals(dto.getValidadeAposAberto()))
                 )
             )
             .findFirst();
 
-        if (estoqueIdentico.isPresent()) {
-            // Se é tudo idêntico (Lote E Validade), apenas soma a quantidade.
-            Estoque estoque = estoqueIdentico.get();
+        Estoque estoqueSalvo;
+
+        if (loteExistente.isPresent()) {
+            Estoque estoque = loteExistente.get();
             estoque.setQuantidade(estoque.getQuantidade() + dto.getQuantidade());
-            return estoqueRepository.save(estoque);
+            estoqueSalvo = estoqueRepository.save(estoque);
         } else {
-            // Se mudou o lote OU a validade, cria um registro novo (Nova linha na tabela).
             Estoque novoEstoque = new Estoque();
             novoEstoque.setQuantidade(dto.getQuantidade());
             novoEstoque.setStatus(dto.getStatus());
             novoEstoque.setLote(dto.getLote());
-            novoEstoque.setValidadeAposAberto(dto.getValidadeAposAberto()); // A data diferente fica salva aqui
+            novoEstoque.setValidadeAposAberto(dto.getValidadeAposAberto());
             
             novoEstoque.setMedicamento(medicamento);
             medicamento.getEstoques().add(novoEstoque);
             
-            return estoqueRepository.save(novoEstoque);
+            estoqueSalvo = estoqueRepository.save(novoEstoque);
         }
+
+        // Histórico de Entrada (Destinatário null)
+        historicoService.registrar(
+            "ENTRADA", 
+            medicamento.getNome(), 
+            "Sistema", 
+            "Entrada de " + dto.getQuantidade() + "un. Lote: " + dto.getLote(),
+            null 
+        );
+
+        return estoqueSalvo;
     }
 
     @Transactional
@@ -87,22 +98,31 @@ public class EstoqueService {
         return estoqueRepository.findAll();
     }
 
-    // --- SUA LÓGICA DE DESPACHO (Mantendo a remoção do medicamento se zerar) ---
     @Transactional
     public void realizarDespacho(DespachoDTOCriar dados) {
         Medicamento medicamento = medicamentoRepository.findById(dados.medicamentoId())
-                .orElseThrow(() -> new RuntimeException("Medicamento não encontrado para este ID."));
+                .orElseThrow(() -> new RuntimeException("Medicamento não encontrado."));
 
         List<Estoque> lotes = medicamento.getEstoques();
-
         long saldoTotal = lotes.stream().mapToLong(Estoque::getQuantidade).sum();
         int quantidadeDesejada = dados.quantidade();
 
         if (saldoTotal < quantidadeDesejada) {
-            throw new RuntimeException("Estoque insuficiente! Total disponível: " + saldoTotal);
+            throw new RuntimeException("Estoque insuficiente!");
         }
 
-        // Lógica FIFO (Consome lote a lote)
+        // Registrar Histórico de Saída (Com Destinatário)
+        String nomePaciente = StringUtils.hasText(dados.paciente()) ? dados.paciente() : "Não informado";
+        String obs = StringUtils.hasText(dados.observacao()) ? dados.observacao() : "Sem observação";
+        
+        historicoService.registrar(
+            "SAIDA", 
+            medicamento.getNome(), 
+            "Sistema", 
+            "Despacho de " + dados.quantidade() + "un. Obs: " + obs,
+            nomePaciente
+        );
+
         long faltaRemover = quantidadeDesejada;
         Iterator<Estoque> iterator = lotes.iterator();
         
@@ -111,20 +131,24 @@ public class EstoqueService {
             long qtdNoLote = loteAtual.getQuantidade();
 
             if (qtdNoLote <= faltaRemover) {
-                // Esvaziou o lote
                 faltaRemover -= qtdNoLote;
                 estoqueRepository.delete(loteAtual);
                 iterator.remove(); 
             } else {
-                // Sobrou no lote
                 loteAtual.setQuantidade(qtdNoLote - faltaRemover);
                 faltaRemover = 0;
                 estoqueRepository.save(loteAtual);
             }
         }
         
-        // Se acabou tudo, deleta o cadastro do remédio.
         if (medicamento.getEstoques().isEmpty()) {
+            historicoService.registrar(
+                "SISTEMA", 
+                medicamento.getNome(), 
+                "Automático", 
+                "Medicamento removido do cadastro pois o estoque zerou.",
+                null
+            );
             medicamentoRepository.delete(medicamento);
         } else {
             medicamentoRepository.save(medicamento);
