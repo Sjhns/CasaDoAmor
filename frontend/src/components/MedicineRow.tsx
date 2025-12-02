@@ -16,6 +16,11 @@ interface MedicineRowProps {
     medicamento: MedicamentoResponse;
     onEdit: (id: string) => void;
     onDispatch?: (id: string) => void;
+    
+    // --- ADICIONE ISTO PARA CORRIGIR O ERRO ---
+    onViewDetails?: (med: MedicamentoResponse) => void; 
+    // -----------------------------------------
+
     isLast: boolean;
     lastRowClass?: string;
 }
@@ -24,6 +29,7 @@ export const MedicineRow = ({
     medicamento,
     onEdit,
     onDispatch,
+    onViewDetails, // <--- Recebendo aqui
     isLast,
 }: MedicineRowProps) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -72,15 +78,18 @@ export const MedicineRow = ({
     const handleRowClick = () => {
         if (hasMultipleBatches) {
             setIsExpanded(!isExpanded);
+        } else {
+            // Se tiver a função e for lote único, abre detalhes
+            if (onViewDetails) {
+                onViewDetails(medicamento);
+            }
         }
     };
 
     return (
         <>
             <tr
-                className={`transition-colors ${
-                    hasMultipleBatches ? "cursor-pointer" : ""
-                } ${
+                className={`transition-colors cursor-pointer ${
                     isExpanded ? "bg-blue-50/50" : expired ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50"
                 }`}
                 onClick={handleRowClick}
@@ -212,7 +221,15 @@ export const MedicineRow = ({
                                         const statusLote = dataValidade ? getStatusByDate(dataValidade) : "ok";
                                         
                                         return (
-                                            <tr key={est.id || idx} className="hover:bg-gray-100">
+                                            <tr 
+                                                key={est.id || idx} 
+                                                className="hover:bg-blue-100 cursor-pointer transition-colors"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    // Clicar no lote também abre os detalhes
+                                                    if (onViewDetails) onViewDetails(medicamento);
+                                                }}
+                                            >
                                                 <td className="py-2 font-medium text-gray-800">{est.lote}</td>
                                                 <td className="py-2 text-gray-600">{formatDate(dataValidade)}</td>
                                                 <td className="py-2 font-bold text-gray-800">{est.quantidade} un</td>

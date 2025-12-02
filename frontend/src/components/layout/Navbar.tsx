@@ -11,7 +11,7 @@ export const Navbar = () => {
   const { unreadCount } = useNotifications();
 
   return (
-    <header className="bg-sky-500 px-10 py-2 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-sky-500/90 backdrop-blur-md shadow-sm px-10 py-2 flex items-center justify-between transition-all">
       {/* Logo */}
       <div className={`absolute left-0 flex items-center justify-center transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-48'}`}>
         <img 
@@ -28,7 +28,7 @@ export const Navbar = () => {
             placeholder="Pesquise algo"
             value={buscaQuery}
             onChange={(e) => setBuscaQuery(e.target.value)}
-            className="w-full bg-gray-200 rounded-lg pl-4 pr-10 py-2.5 text-gray-700 placeholder-gray-500 focus:outline-none"
+            className="w-full bg-gray-100/90 rounded-lg pl-4 pr-10 py-2.5 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50"
           />
 
           <button className="absolute right-0 top-0 h-full px-3 flex items-center justify-center rounded-r-lg transition-colors cursor-pointer">

@@ -7,12 +7,14 @@ import {
 } from "lucide-react";
 import { useMedicamentos } from "../hook/useMedicamentos";
 import { MedicineRow } from "./MedicineRow";
+import type { MedicamentoResponse } from "../services/fetch-medicamentos"; // Import necessário
 
 interface MedicamentosTableProps {
     searchTerm?: string;
     itemsPerPage?: number;
     onEdit?: (id: string) => void;
     onDispatch?: (id: string) => void;
+    onViewDetails?: (med: MedicamentoResponse) => void; // <--- NOVA PROP
 }
 
 const TABLE_HEAD = [
@@ -43,12 +45,12 @@ export const MedicamentosTable = ({
     itemsPerPage = 5,
     onEdit,
     onDispatch,
+    onViewDetails, // <--- Recebendo
 }: MedicamentosTableProps) => {
-    // 1. Estado e Hook (Integração)
     const [page, setPage] = useState(1);
     const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-    // Resetar página quando a busca mudar (evitar setState no render)
+    // Resetar página quando a busca mudar
     useEffect(() => {
         setPage(1);
     }, [searchTerm]);
@@ -76,24 +78,21 @@ export const MedicamentosTable = ({
         setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
     };
 
-    // integrar com modal de despacho
     const handleDispatch = (id: string) => {
         if (onDispatch) {
             onDispatch(id);
         }
     };
 
-    // integrar com modal de edicao
     const handleEdit = (id: string) => {
         if (onEdit) {
             onEdit(id);
         }
     };
 
-    // Renderização de Loading com Skeleton (Tailwind)
     if (isLoading) {
         return (
-            <div className="h-full w-full shadow-sm  rounded-lg bg-white">
+            <div className="h-full w-full shadow-sm rounded-lg bg-white">
                 <div className="rounded-none mb-0 pb-2 px-4 py-3">
                     <h5 className="text-lg font-semibold text-gray-900">
                         Lista de Medicamentos
@@ -126,7 +125,6 @@ export const MedicamentosTable = ({
         );
     }
 
-    // Renderização de Erro (Tailwind)
     if (isError) {
         return (
             <div className="h-full w-full shadow-sm border border-red-200 rounded-lg bg-red-50">
@@ -145,7 +143,6 @@ export const MedicamentosTable = ({
         );
     }
 
-    // rederizacao principal
     return (
         <div className="h-full w-full rounded-lg bg-white overflow-x-auto overflow-hidden">
             <div className="rounded-none mb-0 pb-2 px-4 py-3">
@@ -202,6 +199,7 @@ export const MedicamentosTable = ({
                                         medicamento={med}
                                         onEdit={handleEdit}
                                         onDispatch={handleDispatch}
+                                        onViewDetails={onViewDetails} // <--- Repassando para a linha
                                         isLast={
                                             index === medicamentos.length - 1
                                         }
@@ -225,7 +223,7 @@ export const MedicamentosTable = ({
                 </table>
             </div>
 
-            {/* Paginação no Footer */}
+            {/* Paginação */}
             <div className="flex flex-col gap-4 items-center justify-between p-4 md:flex-row">
                 <span className="text-sm text-gray-600 font-normal">
                     Página {page} de {totalPaginas}

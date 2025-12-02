@@ -15,7 +15,7 @@ export default function OperationItem({ operation }: OperationItemProps) {
   const typeColor = isSaida ? "text-red-700 bg-red-50" : (isEntrada ? "text-green-700 bg-green-50" : "text-gray-700 bg-gray-100");
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-3 hover:shadow-md transition-shadow">
+    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-3 hover:shadow-md hover:bg-gray-50 transition-all duration-200 cursor-default">
       {/* --- Seção Superior --- */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
         <div className="flex-1">

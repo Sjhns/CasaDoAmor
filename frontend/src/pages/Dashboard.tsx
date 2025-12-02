@@ -5,17 +5,19 @@ import { SearchBar } from "../components/SearchBar";
 import { useDebounce } from "../hook/useDebounce";
 import MedicationFormModal from "../components/MedicationFormModal";
 import ModalCadastroEstoque from "../components/ModalCadastroEstoque";
-import ModalDespacho from "../components/DespachoModal"; // IMPORTADO
+import ModalDespacho from "../components/DespachoModal";
+import MedicationDetailsModal from "../components/MedicationDetailModal"; // <--- NOVO IMPORT
 import { Layout } from "../components/layout";
 import { API_URL } from "../constants";
-import { type FormData } from "../schemas/MedicationFormModal.schema"; 
+import { type FormData } from "../schemas/MedicationFormModal.schema";
+import type { MedicamentoResponse } from "../services/fetch-medicamentos"; // Importando o tipo
 
 export const Dashboard = () => {
     // Busca e Filtros
     const [tabelaBusca, setTabelaBusca] = useState("");
     const debaunceBusca = useDebounce(tabelaBusca, 500);
 
-    // Estado para forçar atualização da tabela (o segredo do update instantâneo)
+    // Estado para forçar atualização da tabela
     const [refreshKey, setRefreshKey] = useState(0);
 
     // Modais
@@ -25,6 +27,9 @@ export const Dashboard = () => {
     // Configurações do Modal de Despacho
     const [isDespachoOpen, setIsDespachoOpen] = useState(false);
     const [medicationToDispatch, setMedicationToDispatch] = useState<{ id: string, nome: string, estoqueAtual: number } | null>(null);
+
+    // Configurações do Modal de Detalhes (NOVO)
+    const [viewingMed, setViewingMed] = useState<MedicamentoResponse | null>(null);
 
     // Configurações do Modal de Edição/Criação
     const [novoMedicamentoId, setNovoMedicamentoId] = useState<string | null>(null);
@@ -41,46 +46,42 @@ export const Dashboard = () => {
         setIsCadastrarEstoqueOpen(true);
     };
 
-    // Chamado pela Tabela quando clica no ícone de despacho
     const handleOpenDispatch = (id: string) => {
-        // Precisamos buscar detalhes rápidos ou passar via prop se a tabela tivesse tudo.
-        // Como o `onDispatch` do `MedicamentosTable` só passa o ID, buscamos ou passamos dummy para abrir
-        // O ideal é passar o objeto todo na tabela, vou ajustar isso abaixo.
-        // Assumindo que a table passará ID. Faremos um fetch rápido ou,
-        // MELHOR: Ajustar a MedicamentosTable para passar o objeto (ver passo 3).
-        // AQUI, assumirei que a tabela passou o objeto completo ou buscamos.
         axios.get(`${API_URL}/medicamento/${id}`).then(res => {
             setMedicationToDispatch({
                 id: res.data.id,
                 nome: res.data.nome,
-                estoqueAtual: res.data.estoqueTotal || res.data.estoqueAtual // Ajuste conforme seu retorno da API
+                estoqueAtual: res.data.estoqueTotal || res.data.estoqueAtual 
             });
             setIsDespachoOpen(true);
         });
     };
 
-    // --- Handlers de Sucesso (Update Instantâneo) ---
+    // NOVO HANDLER: Abre o modal de detalhes
+    const handleOpenDetails = (med: MedicamentoResponse) => {
+        setViewingMed(med);
+    };
+
+    // --- Handlers de Sucesso ---
 
     const handleRefreshTable = () => {
-        setRefreshKey((prev) => prev + 1); // Incrementa contador para recarregar tabela
+        setRefreshKey((prev) => prev + 1);
     };
 
     const handleMedicationCreated = (id: string) => {
         setNovoMedicamentoId(id);
-        setIsModalOpen(false); // Fecha cadastro remédio
-        handleRefreshTable();  // <--- ATUALIZA TABELA INSTANTANEAMENTE
-        setIsCadastrarEstoqueOpen(true); // Abre cadastro estoque
+        setIsModalOpen(false);
+        handleRefreshTable();
+        setIsCadastrarEstoqueOpen(true);
     };
 
     const handleDispatchSuccess = () => {
-        handleRefreshTable(); // <--- ATUALIZA TABELA E REMOVE SE ESTOQUE FOR 0
+        handleRefreshTable();
     };
 
-    // --- Edição ---
     const handleOpenEditById = async (id: string) => {
         try {
             const { data } = await axios.get(`${API_URL}/medicamento/${id}`);
-            // Mapeamento conforme seu schema
             const formData: FormData & { id: string } = {
                 id: String(data.id),
                 nome: data.nome ?? "",
@@ -135,41 +136,40 @@ export const Dashboard = () => {
                         </div>
 
                         <div className="overflow-x-auto">
-                            {/* A prop key={refreshKey} garante que a tabela recarregue quando a key muda */}
                             <MedicamentosTable
                                 key={refreshKey} 
                                 searchTerm={debaunceBusca}
                                 onEdit={handleOpenEditById}
-                                onDispatch={handleOpenDispatch} // Passando a função
+                                onDispatch={handleOpenDispatch}
+                                onViewDetails={handleOpenDetails} // <--- PASSANDO A PROP NOVA
                             />
                         </div>
                     </div>
                 </main>
             </div>
 
-            {/* Modal Criação/Edição de Remédio */}
+            {/* Modal Criação/Edição */}
             {isModalOpen && (
                 <MedicationFormModal
                     medicationData={editingMed}
                     onClose={() => setIsModalOpen(false)}
                     onSuccessCreate={handleMedicationCreated}
-                    // Adicione onSuccessEdit={handleRefreshTable} se seu componente suportar para edições
                 />
             )}
 
-            {/* Modal Cadastro de Estoque Inicial */}
+            {/* Modal Cadastro de Estoque */}
             {isCadastrarEstoqueOpen && (
                 <ModalCadastroEstoque
                     onClose={() => {
                         setIsCadastrarEstoqueOpen(false);
-                        handleRefreshTable(); // Garante refresh ao fechar/salvar
+                        handleRefreshTable();
                     }}
                     open={isCadastrarEstoqueOpen}
                     defaultMedicamentoId={novoMedicamentoId ?? undefined}
                 />
             )}
 
-            {/* Modal Despacho (NOVO) */}
+            {/* Modal Despacho */}
             {isDespachoOpen && (
                 <ModalDespacho
                     open={isDespachoOpen}
@@ -178,6 +178,13 @@ export const Dashboard = () => {
                     onSuccess={handleDispatchSuccess}
                 />
             )}
+
+            {/* NOVO: Modal de Detalhes (Leitura) */}
+            <MedicationDetailsModal
+                isOpen={!!viewingMed}
+                onClose={() => setViewingMed(null)}
+                medicamento={viewingMed}
+            />
         </Layout>
     );
 };

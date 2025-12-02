@@ -14,35 +14,41 @@ public class MedicamentoEstoqueDTOListar {
     private UUID idMedicamento;
     private String nomeMedicamento;
     private String formaFarmaceutica;
-    private String viaDeAdministracao;
-    private String concentracao;
     private String categoriaTerapeutica;
     
+    // --- CAMPOS QUE FALTAVAM ---
+    private String laboratorioFabricante;
+    private String viaDeAdministracao;
+    private String concentracao;
+    // ---------------------------
+
     private Long estoqueMinimo;
     private Long estoqueMaximo;
     private Long quantidadeTotalEstoque;
 
-    // Campos de resumo (para a linha fechada da tabela)
     private String lote;
     private LocalDate validade;
 
-    // --- O CAMPO QUE FALTAVA ---
     private List<EstoqueDTOListar> estoques;
 
     public static MedicamentoEstoqueDTOListar fromEntity(Medicamento medicamento) {
         MedicamentoEstoqueDTOListar dto = new MedicamentoEstoqueDTOListar();
 
-        // 1. Dados básicos do Medicamento
         dto.setIdMedicamento(medicamento.getId());
         dto.setNomeMedicamento(medicamento.getNome());
         dto.setFormaFarmaceutica(medicamento.getFormaFarmaceutica());
+        dto.setCategoriaTerapeutica(medicamento.getCategoriaTerapeutica());
+        
+        // --- MAPEANDO OS CAMPOS NOVOS ---
+        dto.setLaboratorioFabricante(medicamento.getLaboratorioFabricante());
         dto.setViaDeAdministracao(medicamento.getViaDeAdministracao());
         dto.setConcentracao(medicamento.getConcentracao());
-        dto.setCategoriaTerapeutica(medicamento.getCategoriaTerapeutica());
+        // --------------------------------
+
         dto.setEstoqueMinimo(medicamento.getEstoqueMinimo());
         dto.setEstoqueMaximo(medicamento.getEstoqueMaximo());
 
-        // 2. Dados de Resumo (Primeiro lote encontrado, apenas para exibição rápida)
+        // Dados de Resumo (Primeiro lote)
         Optional<Estoque> primeiroEstoque = medicamento.getEstoques().stream().findFirst();
         if (primeiroEstoque.isPresent()) {
             dto.setLote(primeiroEstoque.get().getLote());
@@ -52,13 +58,13 @@ public class MedicamentoEstoqueDTOListar {
             dto.setValidade(null);
         }
 
-        // 3. Soma Total
+        // Soma Total
         long total = medicamento.getEstoques().stream()
                 .mapToLong(e -> e.getQuantidade() != null ? e.getQuantidade() : 0L)
                 .sum();
         dto.setQuantidadeTotalEstoque(total);
 
-        // 4. PREENCHENDO A LISTA (Isso fará o Accordion funcionar)
+        // Lista de Detalhes
         if (medicamento.getEstoques() != null) {
             List<EstoqueDTOListar> listaEstoques = medicamento.getEstoques().stream()
                     .map(EstoqueDTOListar::fromEntity)
