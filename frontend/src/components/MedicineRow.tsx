@@ -116,6 +116,7 @@ export const MedicineRow = ({
                     </div>
                 </td>
 
+                {/* Nome e Tag de Lotes */}
                 <td className={tdClass()}>
                     <div className="flex flex-col items-start gap-1">
                         <span className={`text-sm font-bold ${expired ? "text-red-800" : "text-gray-900"}`}>
