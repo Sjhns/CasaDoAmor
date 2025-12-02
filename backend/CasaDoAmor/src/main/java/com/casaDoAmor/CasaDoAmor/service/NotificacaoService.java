@@ -56,14 +56,21 @@ public class NotificacaoService {
                     .sum();
 
             if (saldoTotal <= med.getEstoqueMinimo() && saldoTotal > 0) {
-                // Verifica se já existe notificação similar não lida
-                boolean jaNotificado = notificacaoRepo
-                        .findByLidaFalseOrderByDataCriacaoDesc()
-                        .stream()
-                        .anyMatch(n -> n.getTipoAlerta().equals("ESTOQUE_CRITICO")
-                                && n.getNomeMedicamento().equals(med.getNome()));
+                // Política: única até ser lida; se lida, reenviar após 7 dias se persistir
+                Notificacao ultima = notificacaoRepo
+                        .findTopByTipoAlertaAndNomeMedicamentoOrderByDataCriacaoDesc(
+                                "ESTOQUE_CRITICO", med.getNome());
 
-                if (!jaNotificado) {
+                boolean deveCriar = false;
+                if (ultima == null) {
+                    deveCriar = true;
+                } else if (!ultima.isLida()) {
+                    deveCriar = false; // ainda não lida: não duplicar
+                } else {
+                    deveCriar = ultima.getDataCriacao().isBefore(LocalDateTime.now().minusDays(7));
+                }
+
+                if (deveCriar) {
                     criarNotificacao(
                             "ESTOQUE_CRITICO",
                             "Estoque crítico: " + med.getNome() + " está com apenas " + saldoTotal + " unidades!",
@@ -94,6 +101,7 @@ public class NotificacaoService {
     public void verificarMedicamentosVencidos() {
         List<Estoque> estoques = estoqueRepo.findAll();
         LocalDate hoje = LocalDate.now();
+        java.util.Set<String> enviadosEstaExecucao = new java.util.HashSet<>();
 
         for (Estoque estoque : estoques) {
             if (estoque.getValidadeAposAberto() != null) {
@@ -118,7 +126,8 @@ public class NotificacaoService {
                         deveCriar = ultima.getDataCriacao().isBefore(LocalDateTime.now().minusDays(7));
                     }
 
-                    if (deveCriar) {
+                    String chave = "VENCIDO|" + estoque.getMedicamento().getNome() + "|" + dataVencimento.toString();
+                    if (deveCriar && enviadosEstaExecucao.add(chave)) {
                         criarNotificacao(
                                 "VENCIDO",
                                 "Medicamento vencido: " + estoque.getMedicamento().getNome() +
@@ -152,6 +161,7 @@ public class NotificacaoService {
         List<Estoque> estoques = estoqueRepo.findAll();
         LocalDate hoje = LocalDate.now();
         LocalDate limite = hoje.plusDays(30);
+        java.util.Set<String> enviadosEstaExecucao = new java.util.HashSet<>();
 
         for (Estoque estoque : estoques) {
             if (estoque.getValidadeAposAberto() != null) {
@@ -176,7 +186,9 @@ public class NotificacaoService {
                         deveCriar = ultima.getDataCriacao().isBefore(LocalDateTime.now().minusDays(7));
                     }
 
-                    if (deveCriar) {
+                    String chave = "PROXIMO_VENCIMENTO|" + estoque.getMedicamento().getNome() + "|"
+                            + dataVencimento.toString();
+                    if (deveCriar && enviadosEstaExecucao.add(chave)) {
                         long diasRestantes = java.time.temporal.ChronoUnit.DAYS.between(hoje, dataVencimento);
 
                         criarNotificacao(
