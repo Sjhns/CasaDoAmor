@@ -84,8 +84,10 @@ public class EstoqueService {
                 "Entrada de " + dto.getQuantidade() + "un. Lote: " + dto.getLote(),
                 null);
 
-        // Verificar se ainda está em estoque crítico após entrada
+        // Verificações de notificações após entrada de estoque
         notificacaoService.verificarMedicamentosCriticos();
+        notificacaoService.verificarMedicamentosVencidos();
+        notificacaoService.verificarMedicamentosProximosVencimento();
 
         return estoqueSalvo;
     }
@@ -152,8 +154,10 @@ public class EstoqueService {
             medicamentoRepository.delete(medicamento);
         } else {
             medicamentoRepository.save(medicamento);
-            // Verificar se ficou em estoque crítico após despacho
+            // Verificações de notificações após despacho
             notificacaoService.verificarMedicamentosCriticos();
+            notificacaoService.verificarMedicamentosVencidos();
+            notificacaoService.verificarMedicamentosProximosVencimento();
         }
     }
 }

@@ -6,5 +6,17 @@ import java.util.List;
 
 public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> {
     List<Notificacao> findByLidaFalseOrderByDataCriacaoDesc();
+
     List<Notificacao> findAllByOrderByDataCriacaoDesc();
+
+    // Última notificação por tipo/nome/data de vencimento
+    Notificacao findTopByTipoAlertaAndNomeMedicamentoAndDataVencimentoOrderByDataCriacaoDesc(
+            String tipoAlerta,
+            String nomeMedicamento,
+            java.time.LocalDateTime dataVencimento);
+
+    // Última notificação por tipo/nome (sem data de vencimento)
+    Notificacao findTopByTipoAlertaAndNomeMedicamentoOrderByDataCriacaoDesc(
+            String tipoAlerta,
+            String nomeMedicamento);
 }

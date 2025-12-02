@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { MedicamentosTable } from "../components/MedicamentoTable";
 import { SearchBar } from "../components/SearchBar";
@@ -13,6 +14,8 @@ import { type FormData } from "../schemas/MedicationFormModal.schema";
 import type { MedicamentoResponse } from "../services/fetch-medicamentos"; // Importando o tipo
 
 export const Dashboard = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     // Busca e Filtros
     const [tabelaBusca, setTabelaBusca] = useState("");
     const debaunceBusca = useDebounce(tabelaBusca, 500);
@@ -23,17 +26,27 @@ export const Dashboard = () => {
     // Modais
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCadastrarEstoqueOpen, setIsCadastrarEstoqueOpen] = useState(false);
-    
+
     // Configurações do Modal de Despacho
     const [isDespachoOpen, setIsDespachoOpen] = useState(false);
-    const [medicationToDispatch, setMedicationToDispatch] = useState<{ id: string, nome: string, estoqueAtual: number } | null>(null);
+    const [medicationToDispatch, setMedicationToDispatch] = useState<{
+        id: string;
+        nome: string;
+        estoqueAtual: number;
+    } | null>(null);
 
     // Configurações do Modal de Detalhes (NOVO)
-    const [viewingMed, setViewingMed] = useState<MedicamentoResponse | null>(null);
+    const [viewingMed, setViewingMed] = useState<MedicamentoResponse | null>(
+        null
+    );
 
     // Configurações do Modal de Edição/Criação
-    const [novoMedicamentoId, setNovoMedicamentoId] = useState<string | null>(null);
-    const [editingMed, setEditingMed] = useState<(FormData & { id: string }) | undefined>(undefined);
+    const [novoMedicamentoId, setNovoMedicamentoId] = useState<string | null>(
+        null
+    );
+    const [editingMed, setEditingMed] = useState<
+        (FormData & { id: string }) | undefined
+    >(undefined);
 
     // --- Handlers de Abertura ---
 
@@ -47,11 +60,11 @@ export const Dashboard = () => {
     };
 
     const handleOpenDispatch = (id: string) => {
-        axios.get(`${API_URL}/medicamento/${id}`).then(res => {
+        axios.get(`${API_URL}/medicamento/${id}`).then((res) => {
             setMedicationToDispatch({
                 id: res.data.id,
                 nome: res.data.nome,
-                estoqueAtual: res.data.estoqueTotal || res.data.estoqueAtual 
+                estoqueAtual: res.data.estoqueTotal || res.data.estoqueAtual,
             });
             setIsDespachoOpen(true);
         });
@@ -101,6 +114,16 @@ export const Dashboard = () => {
         }
     };
 
+    // Se vier um estado de navegação com busca (ex.: ao clicar na notificação), aplica a busca
+    useEffect(() => {
+        const state = location.state as { search?: string } | null;
+        if (state?.search) {
+            setTabelaBusca(state.search);
+            // Limpa o estado de navegação para não reaplicar o filtro em recarregamentos
+            navigate(".", { replace: true, state: {} });
+        }
+    }, [location.state, navigate]);
+
     return (
         <Layout>
             <div className="flex flex-col md:flex-row">
@@ -137,7 +160,7 @@ export const Dashboard = () => {
 
                         <div className="overflow-x-auto">
                             <MedicamentosTable
-                                key={refreshKey} 
+                                key={refreshKey}
                                 searchTerm={debaunceBusca}
                                 onEdit={handleOpenEditById}
                                 onDispatch={handleOpenDispatch}
