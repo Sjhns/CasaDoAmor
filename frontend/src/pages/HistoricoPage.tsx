@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FiFilter, FiSearch } from "react-icons/fi";
 import OperationItem from "../components/OperationItem";
-import FilterModal from "../components/FilterModal";
+// --- CERTIFIQUE-SE DESTE IMPORT ---
+import FilterModal from "../components/FilterModal"; 
 import type { Operation } from "../types/operation";
 import { API_URL } from "../constants";
 import { Layout } from "../components/layout";
@@ -13,9 +14,11 @@ export default function HistoricoPage() {
   const [filteredOperations, setFilteredOperations] = useState<Operation[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  
+  // --- AQUI ESTAVA O ERRO DE "Cannot find name" ---
+  // Precisamos definir o estado activeFilters e sua função setActiveFilters
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
 
-  // DTO que vem do Backend
   type BackendHistoricoDTO = {
     idHistorico: string;
     tipo?: string | null;
@@ -33,17 +36,26 @@ export default function HistoricoPage() {
       name: dto.medicamentoNome ?? "Não informado",
       date: new Date(dto.dataMovimentacao).toLocaleString("pt-BR"),
       user: dto.usuarioNome ?? "Sistema",
-      recipient: dto.destinatario ?? undefined, // Agora o 'recipient' existe no tipo Operation!
+      recipient: dto.destinatario ?? undefined,
       level: "N/A",
       obs: dto.observacao ?? "",
     };
   };
 
+  // useCallback resolve o aviso de dependência do useEffect
   const obterHistorico = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/historico?page=0&size=1000&sort=dataMovimentacao,desc`
-      );
+      const params = new URLSearchParams();
+      params.append("page", "0");
+      params.append("size", "1000");
+      params.append("sort", "dataMovimentacao,desc");
+
+      // Adiciona filtros se existirem em activeFilters
+      if (activeFilters.tipo) params.append("tipo", activeFilters.tipo);
+      if (activeFilters.usuario) params.append("usuario", activeFilters.usuario);
+      if (activeFilters.medicamento) params.append("medicamento", activeFilters.medicamento);
+
+      const response = await fetch(`${API_URL}/api/historico?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Erro ao buscar histórico");
@@ -60,12 +72,13 @@ export default function HistoricoPage() {
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
     }
-  }, []);
+  }, [activeFilters]); // Recarrega quando os filtros mudam
 
   useEffect(() => {
     obterHistorico();
   }, [obterHistorico]);
 
+  // Filtros locais (Busca textual simples na lista já carregada)
   useEffect(() => {
     let result = [...allOperations];
 
@@ -81,12 +94,8 @@ export default function HistoricoPage() {
       );
     }
 
-    if (activeFilters.user) {
-      result = result.filter((op) => op.user === activeFilters.user);
-    }
-
     setFilteredOperations(result);
-  }, [searchTerm, activeFilters, allOperations]);
+  }, [searchTerm, allOperations]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -127,6 +136,22 @@ export default function HistoricoPage() {
             </div>
           </div>
 
+          {/* Tag visual de Filtro Ativo */}
+          {Object.keys(activeFilters).length > 0 && (
+              <div className="mb-4 flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm">
+                  <span className="font-bold">Filtro Ativo:</span>
+                  {activeFilters.tipo && <span>Tipo: {activeFilters.tipo}</span>}
+                  {activeFilters.usuario && <span>Usuário: {activeFilters.usuario}</span>}
+                  {activeFilters.medicamento && <span>Remédio: {activeFilters.medicamento}</span>}
+                  <button 
+                    onClick={() => setActiveFilters({})}
+                    className="ml-auto text-xs underline hover:text-blue-900"
+                  >
+                    Limpar
+                  </button>
+              </div>
+          )}
+
           <div className="mt-8 space-y-3">
             {filteredOperations.length > 0 ? (
               filteredOperations.map((op) => (
@@ -143,8 +168,8 @@ export default function HistoricoPage() {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             activeFilters={activeFilters}
-            onFilterClick={(filter: string) => {
-              console.log("Ativar filtro:", filter);
+            onApplyFilters={(newFilters) => {
+              setActiveFilters(newFilters);
             }}
             onClearFilters={() => {
               setActiveFilters({});

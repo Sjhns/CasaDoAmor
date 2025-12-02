@@ -35,12 +35,12 @@ public class HistoricoService {
     // Método de busca para o Controller
     public Page<HistoricoResponseDTO> buscarHistorico(
             LocalDateTime dataInicio, LocalDateTime dataFim, 
-            UUID usuarioId, UUID medicamentoId, String tipo, 
+            String usuarioNome, String medicamentoNome, String tipo, 
             Pageable pageable) {
         
-        // Simplificação: Retornando tudo ordenado. 
-        // Se precisar dos filtros (dataInicio, etc), implementamos Specifications depois.
-        return historicoRepository.findAllByOrderByDataMovimentacaoDesc(pageable)
-                .map(HistoricoResponseDTO::fromEntity);
+        return historicoRepository.buscarComFiltros(
+                tipo, usuarioNome, medicamentoNome, dataInicio, dataFim, pageable
+        ).map(HistoricoResponseDTO::fromEntity);
     }
+
 }
