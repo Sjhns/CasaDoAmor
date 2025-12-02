@@ -59,14 +59,6 @@ export const MedicineRow = ({
                 </span>
             </td>
 
-            <td className={tdClass("text-center")}>
-                <span
-                    className={`text-sm font-semibold ${expired ? "text-red-800" : "text-gray-900"}`}
-                >
-                    {medicamento.quantidadeTotalEstoque ?? 0}
-                </span>
-            </td>
-
             <td className={tdClass()}>
                 <span
                     className={`text-sm font-normal ${expired ? "text-red-700" : "text-gray-600"}`}

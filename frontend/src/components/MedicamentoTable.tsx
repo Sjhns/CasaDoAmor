@@ -17,7 +17,6 @@ interface MedicamentosTableProps {
 const TABLE_HEAD = [
     { label: "ID", sortable: false },
     { label: "Nome", sortable: true, key: "nome" },
-    { label: "Estoque Atual", sortable: false, align: "center" },
     { label: "Lote", sortable: false },
     { label: "Tipo", sortable: false },
     { label: "Vencimento", sortable: false },
