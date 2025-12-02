@@ -19,6 +19,7 @@ public class MedicamentoEstoqueDTOListar {
     private String categoriaTerapeutica;
     private Long estoqueMinimo;
     private Long estoqueMaximo;
+    private Long quantidadeTotalEstoque;
 
     public static MedicamentoEstoqueDTOListar fromEntity(Medicamento medicamento) {
         MedicamentoEstoqueDTOListar dto = new MedicamentoEstoqueDTOListar();
@@ -38,6 +39,11 @@ public class MedicamentoEstoqueDTOListar {
         dto.setCategoriaTerapeutica(medicamento.getCategoriaTerapeutica());
         dto.setEstoqueMinimo(medicamento.getEstoqueMinimo());
         dto.setEstoqueMaximo(medicamento.getEstoqueMaximo());
+        // Soma total de quantidade em todos os estoques associados
+        long total = medicamento.getEstoques().stream()
+                .mapToLong(e -> e.getQuantidade() != null ? e.getQuantidade() : 0L)
+                .sum();
+        dto.setQuantidadeTotalEstoque(total);
 
         return dto;
     }
