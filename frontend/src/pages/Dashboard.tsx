@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { MedicamentosTable } from "../components/MedicamentoTable";
 import { SearchBar } from "../components/SearchBar";
@@ -15,6 +15,7 @@ import type { MedicamentoResponse } from "../services/fetch-medicamentos"; // Im
 
 export const Dashboard = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     // Busca e Filtros
     const [tabelaBusca, setTabelaBusca] = useState("");
     const debaunceBusca = useDebounce(tabelaBusca, 500);
@@ -118,8 +119,10 @@ export const Dashboard = () => {
         const state = location.state as { search?: string } | null;
         if (state?.search) {
             setTabelaBusca(state.search);
+            // Limpa o estado de navegação para não reaplicar o filtro em recarregamentos
+            navigate(".", { replace: true, state: {} });
         }
-    }, [location.state]);
+    }, [location.state, navigate]);
 
     return (
         <Layout>
