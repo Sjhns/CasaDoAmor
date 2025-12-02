@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { API_URL } from "../constants";
 import { useEffect, useState } from "react";
 import ErrorModal from "../components/ErrorModal";
+import DenominacaoGenericaFormModal from "./DenominacaoGenericaFormModal";
 
 interface MedicationFormModalProps {
     medicationData?: FormData & { id: string };
