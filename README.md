@@ -9,12 +9,6 @@
 
 Uma aplicação web full-stack completa e funcional para a gestão da **Casa do Amor**. Construído com Java (Spring Boot) no backend e React (Vite) no frontend, o sistema permite o controle eficiente de estoque, gerenciamento de medicamentos, cadastro de doadores e monitoramento de históricos de movimentações.
 
-<br>
-<p align="center">
-  <img width="1072" alt="Casa do Amor Dashboard" src="https://via.placeholder.com/1072x600.png?text=Screenshot+do+Sistema+Casa+do+Amor" />
-</p>
-<br>
-
 ## 📋 Table of Contents
 
 - [Features](#-features)
